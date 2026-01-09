@@ -9,7 +9,8 @@ import {
   X,
   Book,
   Target,
-  Zap
+  Zap,
+  Settings
 } from "lucide-react";
 import { useState } from "react";
 import { MadeWithDyad } from "./made-with-dyad";
@@ -74,7 +75,10 @@ export function Layout({ children }: LayoutProps) {
 
             {/* User Menu / Mobile Toggle */}
             <div className="flex items-center">
-              <div className="hidden sm:flex sm:items-center">
+              <div className="hidden sm:flex sm:items-center space-x-2">
+                <Button variant="ghost" size="sm" onClick={() => navigate("/settings")} title="Configuración">
+                  <Settings className="w-4 h-4" />
+                </Button>
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Salir
@@ -122,6 +126,14 @@ export function Layout({ children }: LayoutProps) {
                  )
               })}
               <div className="border-t border-gray-200 pt-4 pb-1">
+                 <Button 
+                    variant="ghost" 
+                    className="w-full justify-start hover:bg-gray-50"
+                    onClick={() => { navigate("/settings"); setIsMobileMenuOpen(false); }}
+                 >
+                    <Settings className="w-5 h-5 mr-3" />
+                    Configuración
+                 </Button>
                  <Button 
                     variant="ghost" 
                     className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"

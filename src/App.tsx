@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Missions from "./pages/Missions";
 import MissionDetail from "./pages/MissionDetail";
 import Skills from "./pages/Skills";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -127,6 +128,15 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />
