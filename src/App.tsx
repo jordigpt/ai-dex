@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import Notes from "./pages/Notes";
 import Dex from "./pages/Dex";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -87,6 +88,15 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Dex />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
               </ProtectedRoute>
             }
           />
