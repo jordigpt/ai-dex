@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, CheckCircle2, Circle, RefreshCw, Flame, Star, Trophy } from "lucide-react";
+import { Loader2, CheckCircle2, Circle, RefreshCw, Flame, Star, Trophy, ExternalLink } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -250,7 +250,10 @@ const Index = () => {
                         <Badge variant={assignment.mission.type === 'daily' ? 'secondary' : 'default'} className="mb-2">
                            {assignment.mission.type === 'daily' ? 'DAILY QUEST' : 'SIDE QUEST'}
                         </Badge>
-                        <CardTitle className={`text-lg leading-none ${assignment.status === 'completed' ? 'text-gray-500 line-through decoration-gray-400' : ''}`}>
+                        <CardTitle 
+                           className={`text-lg leading-none cursor-pointer hover:text-primary ${assignment.status === 'completed' ? 'text-gray-500 line-through decoration-gray-400' : ''}`}
+                           onClick={() => navigate(`/missions/${assignment.mission.id}`)}
+                        >
                            {assignment.mission.title}
                         </CardTitle>
                      </div>
@@ -267,7 +270,16 @@ const Index = () => {
                     <p className={`text-sm text-muted-foreground mb-4 ${assignment.status === 'completed' ? 'text-gray-400' : ''}`}>
                       {assignment.mission.description}
                     </p>
-                    <div className="flex justify-end">
+                    <div className="flex justify-between items-center">
+                        <Button 
+                           variant="ghost" 
+                           size="sm" 
+                           className="text-muted-foreground text-xs p-0 h-auto hover:bg-transparent hover:text-primary hover:underline"
+                           onClick={() => navigate(`/missions/${assignment.mission.id}`)}
+                        >
+                           Ver detalles <ExternalLink className="ml-1 h-3 w-3" />
+                        </Button>
+
                        <Button 
                         variant={assignment.status === 'completed' ? 'outline' : 'default'} 
                         disabled={assignment.status === 'completed'}

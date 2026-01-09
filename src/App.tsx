@@ -13,6 +13,7 @@ import Notes from "./pages/Notes";
 import Dex from "./pages/Dex";
 import Admin from "./pages/Admin";
 import Missions from "./pages/Missions";
+import MissionDetail from "./pages/MissionDetail";
 import Skills from "./pages/Skills";
 import NotFound from "./pages/NotFound";
 
@@ -81,6 +82,15 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Missions />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/missions/:id"
+            element={
+              <ProtectedRoute>
+                <MissionDetail />
               </ProtectedRoute>
             }
           />

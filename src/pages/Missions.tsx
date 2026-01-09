@@ -5,22 +5,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Sword, Scroll, Map, CheckCircle2 } from "lucide-react";
+import { Loader2, Sword, Scroll, Map, CheckCircle2, ChevronRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function Missions() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [missions, setMissions] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
-        setUserId(session.user.id);
 
         // 1. Fetch Assignments (Active & Completed)
         const { data: assignData, error: assignError } = await supabase
@@ -84,7 +84,11 @@ export default function Missions() {
           const isAssigned = status === "assigned";
 
           return (
-            <Card key={mission.id} className={`${isCompleted ? "opacity-75 bg-gray-50" : ""}`}>
+            <Card 
+              key={mission.id} 
+              className={`cursor-pointer transition-all hover:shadow-md ${isCompleted ? "opacity-75 bg-gray-50" : ""}`}
+              onClick={() => navigate(`/missions/${mission.id}`)}
+            >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <Badge variant="outline" className="mb-2">
@@ -106,14 +110,19 @@ export default function Missions() {
                   {mission.description}
                 </p>
               </CardContent>
-              {isCompleted && (
-                 <CardFooter>
+              <CardFooter className="flex justify-between items-center pt-0 pb-4">
+                 {isCompleted ? (
                     <div className="flex items-center text-green-600 text-sm font-medium">
                        <CheckCircle2 className="w-4 h-4 mr-2" />
                        Misión cumplida
                     </div>
-                 </CardFooter>
-              )}
+                 ) : (
+                    <div className="text-xs text-muted-foreground">
+                       Clic para ver detalles
+                    </div>
+                 )}
+                 {!isCompleted && <ChevronRight className="w-4 h-4 text-gray-400" />}
+              </CardFooter>
             </Card>
           );
         })}
