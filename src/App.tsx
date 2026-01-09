@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import Notes from "./pages/Notes";
+import Dex from "./pages/Dex";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -77,6 +78,15 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Notes />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/dex"
+            element={
+              <ProtectedRoute>
+                <Dex />
               </ProtectedRoute>
             }
           />

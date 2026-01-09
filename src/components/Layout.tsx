@@ -6,7 +6,8 @@ import {
   StickyNote, 
   LogOut, 
   Menu,
-  X
+  X,
+  Book
 } from "lucide-react";
 import { useState } from "react";
 import { MadeWithDyad } from "./made-with-dyad";
@@ -28,6 +29,7 @@ export function Layout({ children }: LayoutProps) {
   const navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard },
     { label: "Notas", href: "/notes", icon: StickyNote },
+    { label: "DEX", href: "/dex", icon: Book },
   ];
 
   const isActive = (path: string) => location.pathname === path;

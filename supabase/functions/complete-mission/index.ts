@@ -7,7 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Level thresholds from plan.md
 const LEVEL_THRESHOLDS = [
   0, 200, 500, 900, 1400, 2000, 2700, 3500, 4400, 5400, 
   6500, 7700, 9000, 10400, 11900, 13500, 15200, 17000, 18900, 20900
@@ -62,20 +61,10 @@ serve(async (req) => {
 
     // 2. Calculate XP
     let xpGained = assignment.mission.xp_reward
-    
-    // Bonus: Reflection (+10%)
-    if (reflection && reflection.length >= 10) {
-      xpGained += Math.floor(assignment.mission.xp_reward * 0.1)
-    }
-    
-    // Bonus: Evidence (+15%)
-    if (evidence_url && evidence_url.length > 0) {
-      xpGained += Math.floor(assignment.mission.xp_reward * 0.15)
-    }
+    if (reflection && reflection.length >= 10) xpGained += Math.floor(assignment.mission.xp_reward * 0.1)
+    if (evidence_url && evidence_url.length > 0) xpGained += Math.floor(assignment.mission.xp_reward * 0.15)
 
-    // 3. Update DB (Sequential operations for safety, could be RPC for strict atomicity)
-    
-    // A. Insert Completion
+    // 3. Update DB Operations
     const { error: completionError } = await supabaseClient
       .from('completions')
       .insert({
@@ -86,7 +75,6 @@ serve(async (req) => {
       })
     if (completionError) throw completionError
 
-    // B. Update Assignment Status
     const { error: updateAssignError } = await supabaseClient
       .from('user_mission_assignments')
       .update({ 
@@ -96,20 +84,18 @@ serve(async (req) => {
       .eq('id', assignment_id)
     if (updateAssignError) throw updateAssignError
 
-    // C. Insert XP Event
     const { error: xpError } = await supabaseClient
       .from('xp_events')
       .insert({
         user_id: user.id,
         source_type: 'completion',
-        source_id: assignment.mission_id, // Linking to mission logically
+        source_id: assignment.mission_id,
         xp: xpGained,
         skill_id: assignment.mission.skill_id
       })
     if (xpError) throw xpError
 
-    // D. Update User Stats (XP, Level, Streak)
-    // Get current stats first
+    // 4. Update Stats & Check Unlocks
     const { data: stats } = await supabaseClient
       .from('user_stats')
       .select('*')
@@ -120,29 +106,19 @@ serve(async (req) => {
     const newXpTotal = currentXp + xpGained
     const newLevel = calculateLevel(newXpTotal)
     
-    // Streak Logic
     let newStreak = stats?.streak_current || 0
     let lastDaily = stats?.last_daily_completed_at ? new Date(stats.last_daily_completed_at) : null
     const today = new Date()
-    today.setHours(0,0,0,0) // Normalize to midnight
+    today.setHours(0,0,0,0)
 
-    // Only update streak if it's a DAILY mission
     if (assignment.mission.type === 'daily') {
       if (!lastDaily) {
-        // First ever daily
         newStreak = 1
       } else {
-        // Check difference in days
-        // We need to be careful with timezones, simpler approach:
-        // formatting to YYYY-MM-DD string might be safer for day comparison
         const lastDateStr = lastDaily.toISOString().split('T')[0]
         const todayStr = today.toISOString().split('T')[0]
         
-        if (lastDateStr === todayStr) {
-          // Already did a daily today, streak doesn't increase, but doesn't break
-          // newStreak remains same
-        } else {
-          // Check if yesterday
+        if (lastDateStr !== todayStr) {
           const yesterday = new Date(today)
           yesterday.setDate(yesterday.getDate() - 1)
           const yesterdayStr = yesterday.toISOString().split('T')[0]
@@ -150,7 +126,6 @@ serve(async (req) => {
           if (lastDateStr === yesterdayStr) {
              newStreak += 1
           } else {
-             // Streak broken
              newStreak = 1
           }
         }
@@ -166,21 +141,63 @@ serve(async (req) => {
     }
 
     if (assignment.mission.type === 'daily') {
-       updates.last_daily_completed_at = new Date().toISOString() // Save full timestamp, DB casts to date if column is DATE
+       updates.last_daily_completed_at = new Date().toISOString()
     }
 
-    const { error: statsError } = await supabaseClient
+    await supabaseClient
       .from('user_stats')
       .update(updates)
       .eq('user_id', user.id)
+
+    // 5. Check DEX Unlocks
+    // Fetch all active cards
+    const { data: allCards } = await supabaseClient
+      .from('dex_cards')
+      .select('*')
+      .eq('is_active', true)
     
-    if (statsError) throw statsError
+    // Fetch already unlocked
+    const { data: unlocked } = await supabaseClient
+      .from('user_dex_unlocks')
+      .select('dex_card_id')
+      .eq('user_id', user.id)
+    
+    const unlockedIds = new Set(unlocked?.map(u => u.dex_card_id) || [])
+    const newUnlocks = []
+
+    if (allCards) {
+      for (const card of allCards) {
+        if (unlockedIds.has(card.id)) continue;
+        
+        let shouldUnlock = false;
+        const rule = card.unlock_rule;
+
+        if (rule && rule.type === 'level') {
+          if (newLevel >= rule.value) shouldUnlock = true;
+        } else if (rule && rule.type === 'streak') {
+          if (newStreak >= rule.value) shouldUnlock = true;
+        }
+        // Add more rules here (e.g., mission count) if needed
+
+        if (shouldUnlock) {
+          newUnlocks.push({
+            user_id: user.id,
+            dex_card_id: card.id
+          })
+        }
+      }
+    }
+
+    if (newUnlocks.length > 0) {
+      await supabaseClient.from('user_dex_unlocks').insert(newUnlocks)
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
       xp_gained: xpGained,
       new_level: newLevel,
-      level_up: newLevel > (stats?.level || 1)
+      level_up: newLevel > (stats?.level || 1),
+      new_unlocks: newUnlocks.length
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
