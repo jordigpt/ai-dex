@@ -7,7 +7,9 @@ import {
   LogOut, 
   Menu,
   X,
-  Book
+  Book,
+  Target,
+  Zap
 } from "lucide-react";
 import { useState } from "react";
 import { MadeWithDyad } from "./made-with-dyad";
@@ -28,6 +30,8 @@ export function Layout({ children }: LayoutProps) {
 
   const navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard },
+    { label: "Misiones", href: "/missions", icon: Target },
+    { label: "Skills", href: "/skills", icon: Zap },
     { label: "Notas", href: "/notes", icon: StickyNote },
     { label: "DEX", href: "/dex", icon: Book },
   ];

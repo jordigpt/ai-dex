@@ -12,6 +12,8 @@ import Onboarding from "./pages/Onboarding";
 import Notes from "./pages/Notes";
 import Dex from "./pages/Dex";
 import Admin from "./pages/Admin";
+import Missions from "./pages/Missions";
+import Skills from "./pages/Skills";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,6 +72,24 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Index />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/missions"
+            element={
+              <ProtectedRoute>
+                <Missions />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/skills"
+            element={
+              <ProtectedRoute>
+                <Skills />
               </ProtectedRoute>
             }
           />
