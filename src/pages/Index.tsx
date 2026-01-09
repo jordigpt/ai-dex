@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle2, Circle, RefreshCw, Flame, Star, Trophy } from "lucide-react";
-import { MadeWithDyad } from "@/components/made-with-dyad";
+import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -35,8 +35,6 @@ const Index = () => {
 
   const fetchData = async () => {
     try {
-      // Don't set full loading on refresh to avoid flickering entire screen if possible,
-      // but for simplicity keep it for now or move to separate loaders.
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -162,11 +160,6 @@ const Index = () => {
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth/login");
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -176,15 +169,12 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground">Vamos a construir, {profile?.display_name || 'Constructor'}.</p>
-          </div>
-          <Button variant="outline" onClick={handleSignOut} size="sm">Cerrar Sesión</Button>
+    <Layout>
+      <div className="space-y-8">
+        {/* Header Content */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">Vamos a construir, {profile?.display_name || 'Constructor'}.</p>
         </div>
 
         {/* Stats Row */}
@@ -303,10 +293,6 @@ const Index = () => {
           )}
         </div>
         
-        <div className="mt-8 pt-8 border-t">
-           <MadeWithDyad />
-        </div>
-
         {selectedAssignment && (
           <MissionCompletionDialog
             isOpen={isModalOpen}
@@ -317,7 +303,7 @@ const Index = () => {
           />
         )}
       </div>
-    </div>
+    </Layout>
   );
 };
 
