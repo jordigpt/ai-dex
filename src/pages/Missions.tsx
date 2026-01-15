@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Sword, Scroll, Map, CheckCircle2, ChevronRight } from "lucide-react";
+import { Loader2, Sword, Scroll, Map, CheckCircle2, ChevronRight, Play } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -15,45 +15,82 @@ export default function Missions() {
   const [loading, setLoading] = useState(true);
   const [missions, setMissions] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [startingId, setStartingId] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // 1. Fetch Assignments (Active & Completed)
+      const { data: assignData, error: assignError } = await supabase
+        .from("user_mission_assignments")
+        .select("mission_id, status")
+        .eq("user_id", session.user.id);
+
+      if (assignError) throw assignError;
+      setAssignments(assignData || []);
+
+      // 2. Fetch All Active Missions
+      const { data: missionData, error: missionError } = await supabase
+        .from("missions")
+        .select("*, skill:skills(name)")
+        .eq("is_active", true)
+        .order("difficulty", { ascending: true });
+
+      if (missionError) throw missionError;
+      setMissions(missionData || []);
+
+    } catch (error: any) {
+      toast({
+        title: "Error cargando misiones",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-
-        // 1. Fetch Assignments (Active & Completed)
-        const { data: assignData, error: assignError } = await supabase
-          .from("user_mission_assignments")
-          .select("mission_id, status")
-          .eq("user_id", session.user.id);
-
-        if (assignError) throw assignError;
-        setAssignments(assignData || []);
-
-        // 2. Fetch All Active Missions
-        const { data: missionData, error: missionError } = await supabase
-          .from("missions")
-          .select("*, skill:skills(name)")
-          .eq("is_active", true)
-          .order("difficulty", { ascending: true });
-
-        if (missionError) throw missionError;
-        setMissions(missionData || []);
-
-      } catch (error: any) {
-        toast({
-          title: "Error cargando misiones",
-          description: error.message,
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
+
+  const handleStartMission = async (e: React.MouseEvent, missionId: string) => {
+    e.stopPropagation(); // Evitar navegar al detalle al hacer clic en el botón
+    setStartingId(missionId);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from("user_mission_assignments")
+        .insert({
+          user_id: session.user.id,
+          mission_id: missionId,
+          status: 'assigned',
+          assigned_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "¡Misión Iniciada!",
+        description: "Se ha añadido a tu lista de tareas activas.",
+      });
+
+      await fetchData(); // Recargar para actualizar estados
+    } catch (error: any) {
+      toast({
+        title: "Error al iniciar",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setStartingId(null);
+    }
+  };
 
   // Helpers to filter missions
   const getMissionStatus = (missionId: string) => {
@@ -82,6 +119,7 @@ export default function Missions() {
           const status = getMissionStatus(mission.id);
           const isCompleted = status === "completed";
           const isAssigned = status === "assigned";
+          const isStarting = startingId === mission.id;
 
           return (
             <Card 
@@ -116,12 +154,27 @@ export default function Missions() {
                        <CheckCircle2 className="w-4 h-4 mr-2" />
                        Misión cumplida
                     </div>
-                 ) : (
-                    <div className="text-xs text-muted-foreground">
-                       Clic para ver detalles
+                 ) : isAssigned ? (
+                    <div className="flex items-center text-blue-600 text-sm font-medium">
+                       <Play className="w-4 h-4 mr-2" />
+                       En progreso
                     </div>
+                 ) : (
+                    <Button 
+                      size="sm" 
+                      onClick={(e) => handleStartMission(e, mission.id)}
+                      disabled={isStarting}
+                      className="w-full sm:w-auto"
+                    >
+                      {isStarting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {!isStarting && <Play className="mr-2 h-4 w-4" />}
+                      Empezar
+                    </Button>
                  )}
-                 {!isCompleted && <ChevronRight className="w-4 h-4 text-gray-400" />}
+                 
+                 {/* Solo mostramos el chevron si ya está completada o en curso para indicar navegación, 
+                     si está disponible mostramos el botón de acción principal */}
+                 {(isCompleted || isAssigned) && <ChevronRight className="w-4 h-4 text-gray-400" />}
               </CardFooter>
             </Card>
           );
@@ -143,7 +196,7 @@ export default function Missions() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Misiones</h1>
-          <p className="text-muted-foreground">Tu mapa de ruta hacia el éxito.</p>
+          <p className="text-muted-foreground">Tu mapa de ruta hacia el éxito. Elige y conquista.</p>
         </div>
 
         <Tabs defaultValue="main" className="w-full">
@@ -161,7 +214,7 @@ export default function Missions() {
           
           <TabsContent value="daily" className="mt-6">
             <div className="mb-4 text-sm text-muted-foreground bg-blue-50 p-3 rounded-md border border-blue-100">
-               Estas misiones son rotativas y se asignan diariamente en tu Dashboard.
+               Estas misiones suelen ser rotativas, pero puedes iniciar manualmente las que te interesen hoy.
             </div>
             <MissionList type="daily" />
           </TabsContent>

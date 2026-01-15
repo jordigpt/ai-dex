@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, ArrowLeft, Trophy, Calendar, CheckCircle2, Circle } from "lucide-react";
+import { Loader2, ArrowLeft, Trophy, Calendar, CheckCircle2, Circle, Play } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { MissionCompletionDialog } from "@/components/MissionCompletionDialog";
 import { format } from "date-fns";
@@ -21,6 +21,7 @@ export default function MissionDetail() {
   const [mission, setMission] = useState<any>(null);
   const [steps, setSteps] = useState<any[]>([]);
   const [assignment, setAssignment] = useState<any>(null);
+  const [starting, setStarting] = useState(false);
   
   // Dialog State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,18 +78,43 @@ export default function MissionDetail() {
     }
   };
 
+  const handleStartMission = async () => {
+    setStarting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from("user_mission_assignments")
+        .insert({
+          user_id: session.user.id,
+          mission_id: mission.id,
+          status: 'assigned',
+          assigned_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "¡Misión Iniciada!",
+        description: "Ahora puedes registrar tu progreso.",
+      });
+
+      await fetchMissionDetails(); // Recargar datos
+    } catch (error: any) {
+      toast({
+        title: "Error al iniciar",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setStarting(false);
+    }
+  };
+
   const handleCompleteMission = async (evidence: string, reflection: string) => {
-    // If not assigned, we might need to assign it first implicitly, 
-    // but for MVP usually users complete what is assigned. 
-    // However, for side-quests, we might allow direct completion.
-    // The complete-mission edge function expects an assignment_id.
-    
-    // Logic: If no assignment exists, create one "on the fly" then complete it?
-    // Or just require assignment. For MVP, let's assume we only complete Assigned missions.
-    // If it's a "Side Quest" browsed from the list, maybe we should "Start" it first?
-    
     if (!assignment) {
-      toast({ title: "Misión no iniciada", description: "Primero debes aceptar o iniciar esta misión (Feature WIP).", variant: "default" });
+      toast({ title: "Error", description: "Debes iniciar la misión primero.", variant: "destructive" });
       return;
     }
 
@@ -128,6 +154,7 @@ export default function MissionDetail() {
   if (!mission) return null;
 
   const isCompleted = assignment?.status === "completed";
+  const isAssigned = assignment?.status === "assigned";
 
   return (
     <Layout>
@@ -186,23 +213,30 @@ export default function MissionDetail() {
           )}
 
           {/* Action Area */}
-          <Card className={`${isCompleted ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"}`}>
-            <CardContent className="pt-6 flex items-center justify-between">
+          <Card className={`${isCompleted ? "bg-green-50 border-green-200" : isAssigned ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-200"}`}>
+            <CardContent className="pt-6 flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h3 className="font-semibold text-lg">
-                  {isCompleted ? "¡Misión Cumplida!" : assignment ? "En Progreso" : "No Asignada"}
+                  {isCompleted ? "¡Misión Cumplida!" : isAssigned ? "En Progreso" : "Disponible"}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {isCompleted 
                     ? `Completada el ${format(new Date(assignment.completed_at), "d MMMM yyyy", { locale: es })}`
-                    : assignment 
-                      ? "Tienes esta misión asignada. ¡Complétala para ganar XP!" 
-                      : "Esta misión está en el catálogo pero no la tienes activa actualmente."
+                    : isAssigned 
+                      ? "Tienes esta misión activa. ¡Complétala para ganar XP!" 
+                      : "Esta misión está disponible para ser iniciada."
                   }
                 </p>
               </div>
               
-              {assignment && !isCompleted && (
+              {!assignment && (
+                 <Button size="lg" onClick={handleStartMission} disabled={starting}>
+                    {starting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    <Play className="mr-2 h-4 w-4" /> Iniciar Misión
+                 </Button>
+              )}
+
+              {isAssigned && !isCompleted && (
                 <Button size="lg" onClick={() => setIsModalOpen(true)}>
                   <Circle className="mr-2 h-4 w-4" /> Completar
                 </Button>
