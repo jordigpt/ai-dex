@@ -48,9 +48,12 @@ export function Layout({ children }: LayoutProps) {
             {/* Logo & Desktop Nav */}
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                <Link 
+                  to="/" 
+                  className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 cursor-pointer hover:opacity-80 transition-opacity"
+                >
                   AI-DEX
-                </span>
+                </Link>
               </div>
               <nav className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 {navItems.map((item) => {
