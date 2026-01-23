@@ -10,9 +10,10 @@ import {
   Book,
   Target,
   Zap,
-  Settings
+  Settings,
+  Shield
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MadeWithDyad } from "./made-with-dyad";
 
 interface LayoutProps {
@@ -23,6 +24,29 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Check admin table
+      const { data: adminData } = await supabase
+        .from("admins")
+        .select("user_id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      
+      // Also allow if email matches hardcoded admin (fallback)
+      const isEmailAdmin = session.user.email === "jordithecreative@gmail.com";
+
+      if (adminData || isEmailAdmin) {
+        setIsAdmin(true);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -36,6 +60,10 @@ export function Layout({ children }: LayoutProps) {
     { label: "Notas", href: "/notes", icon: StickyNote },
     { label: "DEX", href: "/dex", icon: Book },
   ];
+
+  if (isAdmin) {
+    navItems.push({ label: "Admin", href: "/admin", icon: Shield });
+  }
 
   const isActive = (path: string) => location.pathname === path;
 
