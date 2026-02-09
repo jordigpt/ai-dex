@@ -19,97 +19,148 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
+    // Parse body safely
+    let body = {};
+    try {
+      body = await req.json();
+    } catch (e) {
+      // Body might be empty
+    }
+    const { force } = body;
+
     // 1. Get User
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) throw new Error('Unauthorized')
     
     const userId = user.id
 
-    // 2. Check if plan already exists for today
-    // We check assignments created today
+    // 2. Define "Today"
     const todayStart = new Date()
     todayStart.setHours(0,0,0,0)
-    
+
+    // 3. Handle FORCE Regeneration (Clean up pending assignments)
+    if (force) {
+      // Delete only 'assigned' (not completed) missions created today or later
+      await supabaseClient
+        .from('user_mission_assignments')
+        .delete()
+        .eq('user_id', userId)
+        .eq('status', 'assigned')
+        .gte('assigned_at', todayStart.toISOString())
+    }
+
+    // 4. Check if plan exists (after cleanup)
     const { data: existingAssignments } = await supabaseClient
       .from('user_mission_assignments')
       .select('id')
       .eq('user_id', userId)
       .gte('assigned_at', todayStart.toISOString())
 
-    if (existingAssignments && existingAssignments.length > 0) {
-      return new Response(JSON.stringify({ message: 'Plan already exists', assignments: existingAssignments }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    // 3. Get Profile to know preferences (time, track)
+    // If we have assignments and NOT forcing (or force didn't clear everything because some were completed),
+    // we stop here. But if force was true, we likely want to fill the gaps if we deleted pending ones.
+    // For simplicity: If assignments exist > 0 and we are not strictly trying to fill gaps, we return.
+    // However, if we just deleted pending ones, existingAssignments might be only the completed ones.
+    // We want to generate new ones to reach the target quota.
+    
+    // Let's get Profile to know quotas
     const { data: profile } = await supabaseClient
       .from('profiles')
       .select('track_id, time_daily, level_initial')
       .eq('user_id', userId)
       .single()
 
-    // 4. Select Missions
-    // Logic: 
-    // - Always 1 Daily Quest (random from type='daily')
-    // - 1-2 Side/Main quests based on time_daily
+    // Determine quotas
+    // 60+ min = 1 Daily + 1-2 Sides. Let's aim for 2 total active tasks minimum.
+    const targetCount = profile?.time_daily && profile.time_daily >= 60 ? 3 : 2; 
+    const currentCount = existingAssignments?.length || 0;
+
+    if (currentCount >= targetCount && !force) {
+       return new Response(JSON.stringify({ message: 'Plan already exists', assignments: existingAssignments }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
     
+    // If we are here, we need to generate more missions
+    const missionsNeeded = Math.max(1, targetCount - currentCount);
     const missionsToAssign = []
 
-    // A. Get a random Daily
-    const { data: dailies } = await supabaseClient
-      .from('missions')
-      .select('id')
-      .eq('type', 'daily')
-      .eq('is_active', true)
-    
-    if (dailies && dailies.length > 0) {
-      const randomDaily = dailies[Math.floor(Math.random() * dailies.length)]
-      missionsToAssign.push(randomDaily.id)
-    }
+    // 5. Select Missions
+    // A. Daily Quest (Try to have 1 if none exists)
+    // Check if we already have a daily assigned today
+    // We need to fetch types of existing assignments to be smart, but for MVP random is okay,
+    // let's just ensure we pick valid ones.
 
-    // B. Get a Sidequest (Universal or Track specific)
-    // For MVP, we prioritize Setup missions if not completed, but simple logic for now:
-    // Fetch non-completed side missions
+    // Fetch IDs of missions already assigned/completed ever? Or just today? 
+    // Usually we don't repeat missions ever for Main/Side, but Daily repeats.
+    // For MVP: Don't repeat any mission currently assigned today.
     
-    // Get IDs of completed missions to exclude
-    const { data: completed } = await supabaseClient
-      .from('completions')
+    const assignedTodayIds = existingAssignments?.map(a => a.mission_id) || []; // This is actually assignments, we need to join missions... 
+    // Easier: fetch assignment with mission_id
+    const { data: todayAssigns } = await supabaseClient
+      .from('user_mission_assignments')
       .select('mission_id')
       .eq('user_id', userId)
+      .gte('assigned_at', todayStart.toISOString())
     
-    const completedIds = completed?.map(c => c.mission_id) || []
+    const todayMissionIds = todayAssigns?.map(a => a.mission_id) || [];
 
-    let query = supabaseClient
+    // Also avoid recently completed Side/Main missions (last 30 days?)
+    // For MVP: Just avoid what is currently assigned today.
+
+    // B. FETCH CANDIDATE MISSIONS
+    // Filter: (Track IS NULL OR Track = UserTrack) AND IsActive = True
+    
+    let missionQuery = supabaseClient
       .from('missions')
-      .select('id')
-      .eq('type', 'side')
+      .select('id, type')
       .eq('is_active', true)
     
-    if (completedIds.length > 0) {
-      query = query.not('id', 'in', `(${completedIds.join(',')})`)
+    if (profile.track_id) {
+       missionQuery = missionQuery.or(`track_id.is.null,track_id.eq.${profile.track_id}`)
+    } else {
+       missionQuery = missionQuery.is('track_id', null)
     }
 
-    // Filter by track (universal missions have null track_id, or match user track)
-    // query = query.or(`track_id.is.null,track_id.eq.${profile.track_id}`) 
-    // Note: complex OR filters can be tricky in JS client, let's keep it simple: fetch all valid and filter in memory for MVP randomness
+    const { data: candidates } = await missionQuery;
     
-    const { data: sides } = await query
-    
-    if (sides && sides.length > 0) {
-      // Pick 1 or 2 based on time
-      const count = profile?.time_daily && profile.time_daily >= 60 ? 2 : 1
-      
-      // Shuffle array
-      const shuffled = sides.sort(() => 0.5 - Math.random())
-      const selectedSides = shuffled.slice(0, count)
-      
-      selectedSides.forEach(m => missionsToAssign.push(m.id))
+    if (!candidates || candidates.length === 0) {
+       return new Response(JSON.stringify({ success: false, message: 'No active missions found for your track.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
-    // 5. Insert Assignments
+    // Filter out missions already assigned today
+    const available = candidates.filter(m => !todayMissionIds.includes(m.id));
+
+    // Separate by type
+    const dailies = available.filter(m => m.type === 'daily');
+    const others = available.filter(m => m.type !== 'daily'); // Main & Side
+
+    // Logic: 
+    // 1. Ensure 1 Daily is present (if we don't have one today).
+    // Note: checking todayMissionIds type would be expensive without joining. 
+    // Let's just blindly add 1 daily if we have quota, and fill rest with others.
+
+    let slots = missionsNeeded;
+
+    // Pick 1 Daily
+    if (slots > 0 && dailies.length > 0) {
+       const randomDaily = dailies[Math.floor(Math.random() * dailies.length)];
+       missionsToAssign.push(randomDaily.id);
+       slots--;
+    }
+
+    // Pick Rest from Others
+    if (slots > 0 && others.length > 0) {
+       // Shuffle
+       const shuffled = others.sort(() => 0.5 - Math.random());
+       const picked = shuffled.slice(0, slots);
+       picked.forEach(m => missionsToAssign.push(m.id));
+    }
+
+    // 6. Insert Assignments
     if (missionsToAssign.length > 0) {
-      const assignments = missionsToAssign.map(missionId => ({
+      const newAssignments = missionsToAssign.map(missionId => ({
         user_id: userId,
         mission_id: missionId,
         status: 'assigned',
@@ -118,7 +169,7 @@ serve(async (req) => {
 
       const { error: insertError } = await supabaseClient
         .from('user_mission_assignments')
-        .insert(assignments)
+        .insert(newAssignments)
       
       if (insertError) throw insertError
     }
