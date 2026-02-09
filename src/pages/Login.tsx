@@ -10,6 +10,11 @@ const Login = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Determine redirect URL: Use the specific domain in production, or localhost in dev
+  const redirectUrl = import.meta.env.PROD 
+    ? "https://aidex.jordigpt.com" 
+    : window.location.origin;
+
   useEffect(() => {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -32,14 +37,6 @@ const Login = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Manejo de errores de autenticación personalizados (si fuera necesario extender)
-  const getErrorMessage = (error: AuthError) => {
-    if (error instanceof AuthError) {
-      return error.message;
-    }
-    return "An unknown error occurred";
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
@@ -61,6 +58,7 @@ const Login = () => {
 
         <Auth
           supabaseClient={supabase}
+          redirectTo={redirectUrl}
           appearance={{
             theme: ThemeSupa,
             variables: {
