@@ -133,7 +133,7 @@ export default function MissionDetail() {
       toast({
         title: "¡Misión Completada!",
         description: `Ganaste ${data.xp_gained} XP.`,
-        className: "bg-green-50 border-green-200"
+        className: "bg-primary/20 border-primary"
       });
 
       fetchMissionDetails(); // Refresh state
@@ -165,11 +165,11 @@ export default function MissionDetail() {
 
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <Badge variant={mission.type === 'daily' ? 'secondary' : 'default'}>
+            <Badge variant={mission.type === 'daily' ? 'secondary' : 'default'} className="bg-gray-900 text-white hover:bg-gray-800">
               {mission.type.toUpperCase()}
             </Badge>
             <Badge variant="outline">{mission.skill?.name || "General"}</Badge>
-            <Badge variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50">
+            <Badge variant="outline" className="text-gray-900 border-primary/50 bg-primary/20">
               {mission.xp_reward} XP
             </Badge>
           </div>
@@ -194,7 +194,7 @@ export default function MissionDetail() {
               <CardContent className="space-y-4">
                 {steps.map((step) => (
                   <div key={step.id} className="flex items-start space-x-3 p-2 rounded hover:bg-gray-50">
-                    <Checkbox id={step.id} disabled={isCompleted} />
+                    <Checkbox id={step.id} disabled={isCompleted} className="data-[state=checked]:bg-primary data-[state=checked]:text-black border-gray-400" />
                     <div className="grid gap-1.5 leading-none">
                       <label
                         htmlFor={step.id}
@@ -213,7 +213,7 @@ export default function MissionDetail() {
           )}
 
           {/* Action Area */}
-          <Card className={`${isCompleted ? "bg-green-50 border-green-200" : isAssigned ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-200"}`}>
+          <Card className={`${isCompleted ? "bg-green-50 border-green-200" : isAssigned ? "bg-primary/5 border-primary/30" : "bg-gray-50 border-gray-200"}`}>
             <CardContent className="pt-6 flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h3 className="font-semibold text-lg">

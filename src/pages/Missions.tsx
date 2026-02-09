@@ -52,10 +52,6 @@ export default function Missions() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const handleStartMission = async (e: React.MouseEvent, missionId: string) => {
     e.stopPropagation(); // Evitar navegar al detalle al hacer clic en el botón
     setStartingId(missionId);
@@ -124,7 +120,7 @@ export default function Missions() {
           return (
             <Card 
               key={mission.id} 
-              className={`cursor-pointer transition-all hover:shadow-md ${isCompleted ? "opacity-75 bg-gray-50" : ""}`}
+              className={`cursor-pointer transition-all hover:shadow-md ${isCompleted ? "opacity-75 bg-gray-50" : "hover:border-primary/50"}`}
               onClick={() => navigate(`/missions/${mission.id}`)}
             >
               <CardHeader className="pb-2">
@@ -140,7 +136,7 @@ export default function Missions() {
                 <CardDescription className="flex items-center gap-2 mt-1">
                   <span>Dificultad {mission.difficulty}</span>
                   <span>•</span>
-                  <span className="font-semibold text-primary">{mission.xp_reward} XP</span>
+                  <span className="font-semibold text-gray-900">{mission.xp_reward} XP</span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -155,7 +151,7 @@ export default function Missions() {
                        Misión cumplida
                     </div>
                  ) : isAssigned ? (
-                    <div className="flex items-center text-blue-600 text-sm font-medium">
+                    <div className="flex items-center text-primary-foreground/70 text-sm font-medium">
                        <Play className="w-4 h-4 mr-2" />
                        En progreso
                     </div>
@@ -172,8 +168,6 @@ export default function Missions() {
                     </Button>
                  )}
                  
-                 {/* Solo mostramos el chevron si ya está completada o en curso para indicar navegación, 
-                     si está disponible mostramos el botón de acción principal */}
                  {(isCompleted || isAssigned) && <ChevronRight className="w-4 h-4 text-gray-400" />}
               </CardFooter>
             </Card>
@@ -200,20 +194,20 @@ export default function Missions() {
         </div>
 
         <Tabs defaultValue="main" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="daily" className="flex items-center gap-2">
-              <Sword className="w-4 h-4" /> Daily Quests
+          <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+            <TabsTrigger value="daily" className="data-[state=active]:bg-white data-[state=active]:text-black">
+              <Sword className="w-4 h-4 mr-2" /> Daily Quests
             </TabsTrigger>
-            <TabsTrigger value="main" className="flex items-center gap-2">
-              <Map className="w-4 h-4" /> Main Quest
+            <TabsTrigger value="main" className="data-[state=active]:bg-white data-[state=active]:text-black">
+              <Map className="w-4 h-4 mr-2" /> Main Quest
             </TabsTrigger>
-            <TabsTrigger value="side" className="flex items-center gap-2">
-              <Scroll className="w-4 h-4" /> Side Quests
+            <TabsTrigger value="side" className="data-[state=active]:bg-white data-[state=active]:text-black">
+              <Scroll className="w-4 h-4 mr-2" /> Side Quests
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="daily" className="mt-6">
-            <div className="mb-4 text-sm text-muted-foreground bg-blue-50 p-3 rounded-md border border-blue-100">
+            <div className="mb-4 text-sm text-muted-foreground bg-primary/10 p-3 rounded-md border border-primary/20">
                Estas misiones suelen ser rotativas, pero puedes iniciar manualmente las que te interesen hoy.
             </div>
             <MissionList type="daily" />

@@ -1,3 +1,4 @@
+character.">
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -97,18 +98,18 @@ export function MissionCompletionDialog({
         <DialogHeader>
           <DialogTitle>Completar Misión</DialogTitle>
           <DialogDescription>
-            Reclama tus <span className="font-bold text-primary">{xpReward} XP</span> por completar: <br/>
+            Reclama tus <span className="font-bold text-gray-900 bg-primary/20 px-1 rounded">{xpReward} XP</span> por completar: <br/>
             <span className="font-medium text-foreground">"{missionTitle}"</span>
           </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
-          <div className="bg-blue-50 p-3 rounded-md border border-blue-100 text-sm text-blue-700 flex gap-2">
-            <Trophy className="h-4 w-4 mt-0.5 flex-shrink-0" />
+          <div className="bg-primary/10 p-3 rounded-md border border-primary/20 text-sm text-gray-900 flex gap-2">
+            <Trophy className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-700" />
             <div>
               <p className="font-semibold">Tips de Bonus:</p>
-              <ul className="list-disc list-inside text-xs mt-1">
-                <li>+10% XP si escribes una reflexión (&gt;10 letras)</li>
+              <ul className="list-disc list-inside text-xs mt-1 text-gray-600">
+                <li>+10% XP si escribes una reflexión ({'>'}10 letras)</li>
                 <li>+15% XP si añades evidencia (link o captura)</li>
               </ul>
             </div>
@@ -121,7 +122,7 @@ export function MissionCompletionDialog({
               placeholder="¿Qué aprendiste? ¿Qué fue difícil?"
               value={reflection}
               onChange={(e) => setReflection(e.target.value)}
-              className="min-h-[80px]"
+              className="min-h-[80px] focus-visible:ring-primary"
             />
           </div>
           
@@ -154,6 +155,7 @@ export function MissionCompletionDialog({
                 placeholder="https://github.com/..."
                 value={evidenceLink}
                 onChange={(e) => setEvidenceLink(e.target.value)}
+                className="focus-visible:ring-primary"
               />
             ) : (
               <div className="border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition-colors relative">

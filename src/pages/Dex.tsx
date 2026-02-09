@@ -90,13 +90,13 @@ export default function Dex() {
             return (
               <Card 
                 key={card.id} 
-                className={`transition-all ${!isUnlocked ? 'bg-gray-50 opacity-80 border-dashed' : 'hover:shadow-md'}`}
+                className={`transition-all ${!isUnlocked ? 'bg-gray-50 opacity-80 border-dashed' : 'hover:shadow-md hover:border-primary/50'}`}
               >
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-xl flex items-center gap-2">
                       {isUnlocked ? (
-                         <Unlock className="h-5 w-5 text-green-600" />
+                         <Unlock className="h-5 w-5 text-gray-900" />
                       ) : (
                          <Lock className="h-5 w-5 text-gray-400" />
                       )}
@@ -122,7 +122,7 @@ export default function Dex() {
                            href={link.url} 
                            target="_blank" 
                            rel="noreferrer"
-                           className="flex items-center text-sm text-blue-600 hover:underline bg-blue-50 p-2 rounded"
+                           className="flex items-center text-sm text-gray-900 hover:text-black font-medium bg-primary/20 hover:bg-primary/30 p-2 rounded transition-colors"
                         >
                            <ExternalLink className="h-4 w-4 mr-2" />
                            {link.label}

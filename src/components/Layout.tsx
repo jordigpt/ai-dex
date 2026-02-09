@@ -74,10 +74,13 @@ export function Layout({ children }: LayoutProps) {
           <div className="flex justify-between h-16">
             {/* Logo & Desktop Nav */}
             <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
+              <div className="flex-shrink-0 flex items-center gap-2">
+                <div className="w-8 h-8 rounded bg-primary flex items-center justify-center">
+                   <Target className="w-5 h-5 text-primary-foreground" />
+                </div>
                 <Link 
                   to="/" 
-                  className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 cursor-pointer hover:opacity-80 transition-opacity"
+                  className="text-xl font-bold text-gray-900 tracking-tight hover:opacity-80 transition-opacity"
                 >
                   AI-DEX
                 </Link>
@@ -144,7 +147,7 @@ export function Layout({ children }: LayoutProps) {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
                       isActive(item.href)
-                        ? "bg-blue-50 border-primary text-primary"
+                        ? "bg-primary/10 border-primary text-gray-900"
                         : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
                     }`}
                   >

@@ -145,7 +145,7 @@ const Index = () => {
       toast({
         title: "¡Misión Completada!",
         description: `Ganaste ${data.xp_gained} XP.${data.level_up ? " ¡SUBISTE DE NIVEL!" : ""}`,
-        className: "bg-green-50 border-green-200"
+        className: "bg-primary/20 border-primary"
       });
 
       // Refresh data
@@ -179,38 +179,38 @@ const Index = () => {
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-           <Card className="border-l-4 border-l-blue-500">
+           <Card className="border-l-4 border-l-primary">
              <CardContent className="pt-6 flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium text-muted-foreground mb-1">Nivel Actual</div>
                   <div className="text-3xl font-bold text-gray-900">{stats?.level || 1}</div>
                 </div>
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <Star className="h-6 w-6 text-blue-600" />
+                <div className="bg-primary/20 p-3 rounded-full">
+                  <Star className="h-6 w-6 text-gray-900" />
                 </div>
              </CardContent>
            </Card>
            
-           <Card className="border-l-4 border-l-purple-500">
+           <Card className="border-l-4 border-l-primary/60">
              <CardContent className="pt-6 flex items-center justify-between">
                 <div>
                    <div className="text-sm font-medium text-muted-foreground mb-1">XP Total</div>
                    <div className="text-3xl font-bold text-gray-900">{stats?.xp_total || 0}</div>
                 </div>
-                <div className="bg-purple-100 p-3 rounded-full">
-                   <Trophy className="h-6 w-6 text-purple-600" />
+                <div className="bg-primary/20 p-3 rounded-full">
+                   <Trophy className="h-6 w-6 text-gray-900" />
                 </div>
              </CardContent>
            </Card>
 
-           <Card className="border-l-4 border-l-orange-500">
+           <Card className="border-l-4 border-l-black">
              <CardContent className="pt-6 flex items-center justify-between">
                 <div>
                    <div className="text-sm font-medium text-muted-foreground mb-1">Racha (Streak)</div>
                    <div className="text-3xl font-bold text-gray-900">{stats?.streak_current || 0} <span className="text-sm font-normal text-muted-foreground">días</span></div>
                 </div>
-                <div className="bg-orange-100 p-3 rounded-full">
-                   <Flame className="h-6 w-6 text-orange-600" />
+                <div className="bg-gray-100 p-3 rounded-full">
+                   <Flame className="h-6 w-6 text-gray-900" />
                 </div>
              </CardContent>
            </Card>
@@ -229,7 +229,7 @@ const Index = () => {
 
           {assignments.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
-              <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-primary/20 text-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
                 <RefreshCw className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-medium text-gray-900">Tu plan diario está vacío</h3>
@@ -244,21 +244,21 @@ const Index = () => {
           ) : (
             <div className="grid gap-4">
               {assignments.map((assignment) => (
-                <Card key={assignment.id} className={`transition-all hover:shadow-md ${assignment.status === 'completed' ? 'bg-gray-50 border-gray-200' : 'bg-white'}`}>
+                <Card key={assignment.id} className={`transition-all hover:shadow-md border-l-4 ${assignment.status === 'completed' ? 'bg-gray-50 border-gray-200 border-l-gray-300' : 'bg-white border-l-primary'}`}>
                   <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                      <div className="space-y-1">
                         <Badge variant={assignment.mission.type === 'daily' ? 'secondary' : 'default'} className="mb-2">
                            {assignment.mission.type === 'daily' ? 'DAILY QUEST' : 'SIDE QUEST'}
                         </Badge>
                         <CardTitle 
-                           className={`text-lg leading-none cursor-pointer hover:text-primary ${assignment.status === 'completed' ? 'text-gray-500 line-through decoration-gray-400' : ''}`}
+                           className={`text-lg leading-none cursor-pointer hover:text-primary-700 ${assignment.status === 'completed' ? 'text-gray-500 line-through decoration-gray-400' : ''}`}
                            onClick={() => navigate(`/missions/${assignment.mission.id}`)}
                         >
                            {assignment.mission.title}
                         </CardTitle>
                      </div>
                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs border-primary/40">
                            {assignment.mission.xp_reward} XP
                         </Badge>
                         <Badge variant="outline" className="text-xs bg-gray-50">
@@ -274,7 +274,7 @@ const Index = () => {
                         <Button 
                            variant="ghost" 
                            size="sm" 
-                           className="text-muted-foreground text-xs p-0 h-auto hover:bg-transparent hover:text-primary hover:underline"
+                           className="text-muted-foreground text-xs p-0 h-auto hover:bg-transparent hover:text-gray-900 hover:underline"
                            onClick={() => navigate(`/missions/${assignment.mission.id}`)}
                         >
                            Ver detalles <ExternalLink className="ml-1 h-3 w-3" />
@@ -287,7 +287,7 @@ const Index = () => {
                        >
                           {assignment.status === 'completed' ? (
                              <>
-                                <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                                <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />
                                 Completada
                              </>
                           ) : (
