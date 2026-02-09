@@ -82,6 +82,8 @@ export default function Admin() {
 
   const handleCreateMission = async (newMission: any) => {
     try {
+      // NOTE: Create might also fail if RLS is strict and user is not in DB admins.
+      // But user specifically asked about deletion. If this fails, we should move it to edge function too.
       const { error } = await supabase.from("missions").insert({
         title: newMission.title,
         description: newMission.description,
@@ -158,21 +160,23 @@ export default function Admin() {
   const handleDeleteTrack = async (trackId: string) => {
     if (!confirm("¿Estás seguro de eliminar este track?")) return;
 
+    // Optimistic Update: Remove immediately from UI
+    const previousTracks = [...tracks];
+    setTracks(prev => prev.filter(t => t.id !== trackId));
+
     try {
-      const { error } = await supabase.from("tracks").delete().eq("id", trackId);
+      // Use Admin Operations Edge Function to bypass RLS issues
+      const { data, error } = await supabase.functions.invoke('admin-operations', {
+        body: { action: 'delete_track', id: trackId }
+      });
       
-      if (error) {
-        // Manejo específico de error de clave foránea (foreign key violation)
-        if (error.code === '23503') {
-           throw new Error("No se puede eliminar porque tiene misiones o usuarios asignados.");
-        }
-        throw error;
-      }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       
       toast({ title: "Track eliminado correctamente" });
-      // Actualizamos el estado local inmediatamente para reflejar el cambio
-      setTracks(prev => prev.filter(t => t.id !== trackId));
     } catch (error: any) {
+      // Rollback if error
+      setTracks(previousTracks);
       toast({ 
         title: "Error eliminando track", 
         description: error.message, 
