@@ -27,6 +27,15 @@ export default function Missions() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
+      // 0. Get User Profile to know their Track
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("track_id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      
+      const userTrackId = profile?.track_id;
+
       // 1. Fetch Assignments (Active & Completed)
       const { data: assignData, error: assignError } = await supabase
         .from("user_mission_assignments")
@@ -36,12 +45,21 @@ export default function Missions() {
       if (assignError) throw assignError;
       setAssignments(assignData || []);
 
-      // 2. Fetch All Active Missions
-      const { data: missionData, error: missionError } = await supabase
+      // 2. Fetch Active Missions (Filtered by Track + Universal)
+      let query = supabase
         .from("missions")
         .select("*, skill:skills(name)")
-        .eq("is_active", true)
-        .order("difficulty", { ascending: true });
+        .eq("is_active", true);
+
+      if (userTrackId) {
+         // Show Universal (null) OR User's Track
+         query = query.or(`track_id.is.null,track_id.eq.${userTrackId}`);
+      } else {
+         // Fallback: If no track assigned, show only Universal
+         query = query.is("track_id", null);
+      }
+
+      const { data: missionData, error: missionError } = await query.order("difficulty", { ascending: true });
 
       if (missionError) throw missionError;
       setMissions(missionData || []);
@@ -107,7 +125,7 @@ export default function Missions() {
     if (filtered.length === 0) {
       return (
         <div className="text-center py-12 text-muted-foreground">
-          No hay misiones de este tipo disponibles aún.
+          No hay misiones de este tipo disponibles para tu track actual.
         </div>
       );
     }
