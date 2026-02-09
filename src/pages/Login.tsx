@@ -70,6 +70,40 @@ const Login = () => {
               },
             },
           }}
+          localization={{
+            variables: {
+              sign_in: {
+                email_label: "Correo electrónico",
+                password_label: "Contraseña",
+                email_input_placeholder: "Tu correo electrónico",
+                password_input_placeholder: "Tu contraseña",
+                button_label: "Iniciar sesión",
+                loading_button_label: "Iniciando sesión...",
+                social_provider_text: "Iniciar con {{provider}}",
+                link_text: "¿Ya tienes cuenta? Inicia sesión",
+              },
+              sign_up: {
+                email_label: "Correo electrónico",
+                password_label: "Contraseña",
+                email_input_placeholder: "Tu correo electrónico",
+                password_input_placeholder: "Tu contraseña",
+                button_label: "Registrarse",
+                loading_button_label: "Registrando...",
+                social_provider_text: "Registrarse con {{provider}}",
+                link_text: "¿No tienes cuenta? Regístrate",
+                confirmation_text: "Revisa tu correo para confirmar tu cuenta",
+              },
+              forgotten_password: {
+                email_label: "Correo electrónico",
+                password_label: "Contraseña",
+                email_input_placeholder: "Tu correo electrónico",
+                button_label: "Enviar instrucciones",
+                loading_button_label: "Enviando instrucciones...",
+                link_text: "¿Olvidaste tu contraseña?",
+                confirmation_text: "Revisa tu correo para recuperar tu contraseña",
+              },
+            },
+          }}
           providers={[]} // No social providers for MVP as per PRD
           theme="light"
         />
