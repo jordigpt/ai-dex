@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Filter, Database, AlertTriangle, GitMerge } from "lucide-react";
+import { Loader2, Plus, Filter, Database, GitMerge, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -207,6 +207,24 @@ export default function Admin() {
     }
   };
 
+  const handleDeleteTrack = async (trackId: string) => {
+    if (!confirm("¿Estás seguro de eliminar este track? Esto puede fallar si hay misiones o usuarios asignados.")) return;
+
+    try {
+      const { error } = await supabase.from("tracks").delete().eq("id", trackId);
+      if (error) throw error;
+      
+      toast({ title: "Track eliminado correctamente" });
+      fetchData();
+    } catch (error: any) {
+      toast({ 
+        title: "Error eliminando track", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    }
+  };
+
   // Filter missions
   const filteredMissions = missions.filter(m => {
     if (selectedTrackFilter === "all") return true;
@@ -231,7 +249,7 @@ export default function Admin() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold">Admin Panel</h1>
@@ -277,79 +295,118 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-2 bg-white p-4 rounded-lg shadow-sm border">
-          <Filter className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium">Filtrar por Track:</span>
-          <Select 
-            value={selectedTrackFilter} 
-            onValueChange={setSelectedTrackFilter}
-          >
-            <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Seleccionar Track" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los Tracks</SelectItem>
-              <SelectItem value="universal">Universales (Sin Track)</SelectItem>
-              {tracks.map((t) => (
-                <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="ml-auto text-sm text-gray-500">
-             Mostrando {filteredMissions.length} misiones
-          </div>
-        </div>
-
+        {/* Tracks Management */}
         <Card>
           <CardHeader>
-            <CardTitle>Misiones Activas</CardTitle>
-            <CardDescription>Catálogo actual disponible para los usuarios.</CardDescription>
+            <CardTitle>Gestión de Tracks</CardTitle>
+            <CardDescription>Lista de tracks disponibles en el sistema.</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[300px]">Título</TableHead>
-                  <TableHead>Track</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Skill</TableHead>
-                  <TableHead>XP</TableHead>
-                  <TableHead>Diff</TableHead>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead className="w-[100px]">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMissions.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No se encontraron misiones con este filtro.
+                {tracks.map((track) => (
+                  <TableRow key={track.id}>
+                    <TableCell className="font-medium">{track.name}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{track.description}</TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDeleteTrack(track.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filteredMissions.map((m) => (
-                    <TableRow key={m.id}>
-                      <TableCell className="font-medium">
-                        {m.title}
-                        <div className="text-xs text-muted-foreground line-clamp-1">{m.description}</div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={m.track ? "default" : "secondary"}>
-                          {m.track ? m.track.name : "Universal"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{m.type}</Badge>
-                      </TableCell>
-                      <TableCell>{m.skill?.name || '-'}</TableCell>
-                      <TableCell>{m.xp_reward}</TableCell>
-                      <TableCell>{m.difficulty}</TableCell>
-                    </TableRow>
-                  ))
-                )}
+                ))}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
+
+        {/* Missions Management */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 bg-white p-4 rounded-lg shadow-sm border">
+            <Filter className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium">Filtrar Misiones por Track:</span>
+            <Select 
+              value={selectedTrackFilter} 
+              onValueChange={setSelectedTrackFilter}
+            >
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="Seleccionar Track" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los Tracks</SelectItem>
+                <SelectItem value="universal">Universales (Sin Track)</SelectItem>
+                {tracks.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="ml-auto text-sm text-gray-500">
+              Mostrando {filteredMissions.length} misiones
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Misiones Activas</CardTitle>
+              <CardDescription>Catálogo actual disponible para los usuarios.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[300px]">Título</TableHead>
+                    <TableHead>Track</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Skill</TableHead>
+                    <TableHead>XP</TableHead>
+                    <TableHead>Diff</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredMissions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        No se encontraron misiones con este filtro.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredMissions.map((m) => (
+                      <TableRow key={m.id}>
+                        <TableCell className="font-medium">
+                          {m.title}
+                          <div className="text-xs text-muted-foreground line-clamp-1">{m.description}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={m.track ? "default" : "secondary"}>
+                            {m.track ? m.track.name : "Universal"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{m.type}</Badge>
+                        </TableCell>
+                        <TableCell>{m.skill?.name || '-'}</TableCell>
+                        <TableCell>{m.xp_reward}</TableCell>
+                        <TableCell>{m.difficulty}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Create Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
