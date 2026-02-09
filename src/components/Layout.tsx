@@ -14,7 +14,6 @@ import {
   Shield
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { MadeWithDyad } from "./made-with-dyad";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -184,8 +183,11 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
       
-      <footer className="border-t py-4 bg-white">
-         <MadeWithDyad />
+      {/* Footer minimalista sin branding */}
+      <footer className="border-t py-6 bg-white mt-auto">
+        <div className="max-w-5xl mx-auto px-4 text-center text-sm text-gray-400">
+           AI-DEX &copy; {new Date().getFullYear()}
+        </div>
       </footer>
     </div>
   );
