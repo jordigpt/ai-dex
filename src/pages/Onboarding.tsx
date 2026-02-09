@@ -7,12 +7,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, CheckCircle2, Target, Clock, Zap } from "lucide-react";
+import { Loader2, Target, Clock, Zap, Construction } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Track {
   id: string;
   name: string;
   description: string;
+  mission_count?: number;
 }
 
 const LEVELS = [
@@ -56,6 +58,14 @@ export default function Onboarding() {
         .from("tracks")
         .select("id, name, description");
       
+      // 3. Fetch Mission Counts (to detect empty tracks)
+      // Since we can't do a complex join count easily in one go with RLS client sometimes, 
+      // let's fetch all missions ids/track_ids and count in JS for MVP simplicity
+      const { data: missionsData } = await supabase
+        .from("missions")
+        .select("track_id")
+        .eq("is_active", true);
+
       if (error) {
         toast({
           title: "Error cargando datos",
@@ -63,7 +73,19 @@ export default function Onboarding() {
           variant: "destructive",
         });
       } else {
-        setTracks(tracksData || []);
+        const counts: Record<string, number> = {};
+        missionsData?.forEach(m => {
+          if (m.track_id) {
+            counts[m.track_id] = (counts[m.track_id] || 0) + 1;
+          }
+        });
+
+        const tracksWithCount = (tracksData || []).map(t => ({
+          ...t,
+          mission_count: counts[t.id] || 0
+        }));
+
+        setTracks(tracksWithCount);
       }
       setLoading(false);
     };
@@ -106,7 +128,6 @@ export default function Onboarding() {
         description: "Tu plan de acción está listo.",
       });
 
-      // Redirigir al dashboard y forzar recarga para actualizar estado
       window.location.href = "/"; 
     } catch (error: any) {
       toast({
@@ -165,14 +186,24 @@ export default function Onboarding() {
                     value={track.id}
                     id={track.id}
                     className="peer sr-only"
+                    // Optional: Disable if you don't want them to pick empty tracks
+                    // disabled={track.mission_count === 0}
                   />
                   <Label
                     htmlFor={track.id}
                     className="flex flex-col p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 transition-all"
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Target className="h-5 w-5 text-primary" />
-                      <span className="font-semibold text-lg">{track.name}</span>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-primary" />
+                        <span className="font-semibold text-lg">{track.name}</span>
+                      </div>
+                      {(track.mission_count || 0) === 0 && (
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                          <Construction className="w-3 h-3 mr-1" />
+                          Coming Soon
+                        </Badge>
+                      )}
                     </div>
                     <span className="text-muted-foreground">{track.description}</span>
                   </Label>

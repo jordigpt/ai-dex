@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Sword, Scroll, Map, CheckCircle2, ChevronRight, Play } from "lucide-react";
+import { Loader2, Sword, Scroll, Map, CheckCircle2, ChevronRight, Play, Construction } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -16,6 +16,7 @@ export default function Missions() {
   const [missions, setMissions] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
   const [startingId, setStartingId] = useState<string | null>(null);
+  const [userTrack, setUserTrack] = useState<{name: string} | null>(null);
 
   // UseEffect para cargar datos UNA vez al montar
   useEffect(() => {
@@ -30,11 +31,17 @@ export default function Missions() {
       // 0. Get User Profile to know their Track
       const { data: profile } = await supabase
         .from("profiles")
-        .select("track_id")
+        .select("track_id, track:tracks(name)")
         .eq("user_id", session.user.id)
         .maybeSingle();
       
       const userTrackId = profile?.track_id;
+      
+      if (profile?.track) {
+        // Fix TS error: Handle potential array inference from Supabase types
+        const trackData = Array.isArray(profile.track) ? profile.track[0] : profile.track;
+        setUserTrack(trackData as { name: string });
+      }
 
       // 1. Fetch Assignments (Active & Completed)
       const { data: assignData, error: assignError } = await supabase
@@ -124,8 +131,18 @@ export default function Missions() {
     
     if (filtered.length === 0) {
       return (
-        <div className="text-center py-12 text-muted-foreground">
-          No hay misiones de este tipo disponibles para tu track actual.
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-gray-50 border border-dashed rounded-lg">
+          <div className="bg-white p-3 rounded-full mb-4 shadow-sm">
+             <Construction className="w-6 h-6 text-orange-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Próximamente</h3>
+          <p className="text-muted-foreground max-w-sm mt-2">
+            Aún no hay misiones de tipo <span className="font-medium text-gray-700">{type.toUpperCase()}</span> para tu track 
+            {userTrack ? ` (${userTrack.name})` : ""}.
+          </p>
+          <p className="text-sm text-gray-400 mt-4">
+             Estamos trabajando en nuevo contenido. Revisa las otras categorías.
+          </p>
         </div>
       );
     }

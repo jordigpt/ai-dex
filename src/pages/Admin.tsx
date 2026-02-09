@@ -7,6 +7,7 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { TracksManager } from "@/components/admin/TracksManager";
 import { MissionsManager } from "@/components/admin/MissionsManager";
 import { CreateMissionDialog } from "@/components/admin/CreateMissionDialog";
+import { CreateTrackDialog } from "@/components/admin/CreateTrackDialog";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -21,7 +22,8 @@ export default function Admin() {
   const [tracks, setTracks] = useState<any[]>([]);
   
   // Dialog State
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isMissionDialogOpen, setIsMissionDialogOpen] = useState(false);
+  const [isTrackDialogOpen, setIsTrackDialogOpen] = useState(false);
 
   useEffect(() => {
     checkAdmin();
@@ -82,8 +84,6 @@ export default function Admin() {
 
   const handleCreateMission = async (newMission: any) => {
     try {
-      // NOTE: Create might also fail if RLS is strict and user is not in DB admins.
-      // But user specifically asked about deletion. If this fails, we should move it to edge function too.
       const { error } = await supabase.from("missions").insert({
         title: newMission.title,
         description: newMission.description,
@@ -96,12 +96,26 @@ export default function Admin() {
       });
 
       if (error) throw error;
-
       toast({ title: "Misión creada" });
       fetchData();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       throw error; 
+    }
+  };
+
+  const handleCreateTrack = async (trackData: { name: string; description: string }) => {
+    try {
+      const { error } = await supabase.from("tracks").insert({
+        name: trackData.name,
+        description: trackData.description
+      });
+      if (error) throw error;
+      toast({ title: "Track creado exitosamente" });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      throw error;
     }
   };
 
@@ -158,14 +172,13 @@ export default function Admin() {
   };
 
   const handleDeleteTrack = async (trackId: string) => {
-    if (!confirm("¿Estás seguro de eliminar este track?")) return;
+    if (!confirm("⚠️ ADVERTENCIA: Al borrar un track también se borrarán TODAS sus misiones y asignaciones. ¿Seguro?")) return;
 
-    // Optimistic Update: Remove immediately from UI
+    // Optimistic Update
     const previousTracks = [...tracks];
     setTracks(prev => prev.filter(t => t.id !== trackId));
 
     try {
-      // Use Admin Operations Edge Function to bypass RLS issues
       const { data, error } = await supabase.functions.invoke('admin-operations', {
         body: { action: 'delete_track', id: trackId }
       });
@@ -173,9 +186,10 @@ export default function Admin() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       
-      toast({ title: "Track eliminado correctamente" });
+      toast({ title: "Track eliminado correctamente (Cascade)" });
+      // Reload missions as some might have been deleted
+      fetchData();
     } catch (error: any) {
-      // Rollback if error
       setTracks(previousTracks);
       toast({ 
         title: "Error eliminando track", 
@@ -208,7 +222,8 @@ export default function Admin() {
           seeding={seeding}
           onConsolidate={handleConsolidateTracks}
           onSeed={handleSeedDatabase}
-          onOpenCreateDialog={() => setIsDialogOpen(true)}
+          onOpenCreateMission={() => setIsMissionDialogOpen(true)}
+          onOpenCreateTrack={() => setIsTrackDialogOpen(true)}
         />
 
         <TracksManager 
@@ -222,11 +237,17 @@ export default function Admin() {
         />
 
         <CreateMissionDialog
-          isOpen={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
+          isOpen={isMissionDialogOpen}
+          onOpenChange={setIsMissionDialogOpen}
           tracks={tracks}
           skills={skills}
           onCreate={handleCreateMission}
+        />
+
+        <CreateTrackDialog 
+          isOpen={isTrackDialogOpen}
+          onOpenChange={setIsTrackDialogOpen}
+          onCreate={handleCreateTrack}
         />
       </div>
     </Layout>

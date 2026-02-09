@@ -16,14 +16,12 @@ serve(async (req) => {
   }
 
   try {
-    // 1. Client para verificar usuario (Auth normal)
     const supabaseAuth = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
-    // 2. Client con privilegios (Service Role) para ejecutar la acción
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -33,7 +31,6 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseAuth.auth.getUser()
     if (userError || !user) throw new Error('Unauthorized')
 
-    // Verificar permisos: Email hardcodeado O estar en tabla admins
     let isAdmin = SUPER_ADMINS.includes(user.email);
     
     if (!isAdmin) {
@@ -54,19 +51,32 @@ serve(async (req) => {
     console.log(`[admin-operations] User ${user.email} performing ${action} on ${id}`);
 
     if (action === 'delete_track') {
-      // Intentar borrar. Si falla por FK, avisar.
+      // BORRADO EN CASCADA MANUAL
+      // 1. Desvincular perfiles (set track_id = null)
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .update({ track_id: null })
+        .eq('track_id', id);
+      
+      if (profileError) throw new Error(`Error unlink profiles: ${profileError.message}`);
+
+      // 2. Borrar misiones asociadas al track
+      // Nota: Esto también borrará assignments y completions por el CASCADE de la base de datos en missions
+      const { error: missionError } = await supabaseAdmin
+        .from('missions')
+        .delete()
+        .eq('track_id', id);
+      
+      if (missionError) throw new Error(`Error deleting track missions: ${missionError.message}`);
+
+      // 3. Finalmente borrar el track
       const { error } = await supabaseAdmin
         .from('tracks')
         .delete()
         .eq('id', id);
 
-      if (error) {
-        // Postgres foreign key violation code
-        if (error.code === '23503') {
-           throw new Error("No se puede eliminar: El track tiene misiones o usuarios asociados.");
-        }
-        throw error;
-      }
+      if (error) throw error;
+
     } else if (action === 'delete_mission') {
       const { error } = await supabaseAdmin
         .from('missions')
