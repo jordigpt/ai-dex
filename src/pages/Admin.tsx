@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Filter } from "lucide-react";
+import { Loader2, Plus, Filter, Database, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,11 +17,23 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Admin() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   
   // Data State
   const [missions, setMissions] = useState<any[]>([]);
@@ -142,6 +154,32 @@ export default function Admin() {
     }
   };
 
+  const handleSeedDatabase = async () => {
+    setSeeding(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('seed-db');
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({ 
+        title: "Base de datos restaurada", 
+        description: "Tracks unificados y nuevas misiones generadas.",
+        className: "bg-green-50 border-green-200"
+      });
+      
+      await fetchData();
+    } catch (error: any) {
+      toast({ 
+        title: "Error al restaurar", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   // Filter missions
   const filteredMissions = missions.filter(m => {
     if (selectedTrackFilter === "all") return true;
@@ -173,6 +211,29 @@ export default function Admin() {
             <p className="text-muted-foreground">Gestión de contenido del juego.</p>
           </div>
           <div className="flex gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={seeding}>
+                  {seeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
+                  Reiniciar Catálogo
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción BORRARÁ todas las misiones, tracks y skills actuales y las reemplazará por el catálogo unificado y limpio. Las asignaciones de los usuarios se perderán.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSeedDatabase} className="bg-red-600 hover:bg-red-700">
+                    Sí, restaurar todo
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
              <Button onClick={() => setIsDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" /> Nueva Misión
             </Button>
@@ -206,6 +267,7 @@ export default function Admin() {
         <Card>
           <CardHeader>
             <CardTitle>Misiones Activas</CardTitle>
+            <CardDescription>Catálogo actual disponible para los usuarios.</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
