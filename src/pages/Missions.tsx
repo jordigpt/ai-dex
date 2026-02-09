@@ -17,6 +17,11 @@ export default function Missions() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [startingId, setStartingId] = useState<string | null>(null);
 
+  // UseEffect para cargar datos UNA vez al montar
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const fetchData = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -42,6 +47,7 @@ export default function Missions() {
       setMissions(missionData || []);
 
     } catch (error: any) {
+      console.error("Error fetching missions:", error);
       toast({
         title: "Error cargando misiones",
         description: error.message,
@@ -53,7 +59,7 @@ export default function Missions() {
   };
 
   const handleStartMission = async (e: React.MouseEvent, missionId: string) => {
-    e.stopPropagation(); // Evitar navegar al detalle al hacer clic en el botón
+    e.stopPropagation(); 
     setStartingId(missionId);
 
     try {
@@ -76,7 +82,14 @@ export default function Missions() {
         description: "Se ha añadido a tu lista de tareas activas.",
       });
 
-      await fetchData(); // Recargar para actualizar estados
+      // Recargar datos sin loading completo para mejor UX
+      const { data: assignData } = await supabase
+        .from("user_mission_assignments")
+        .select("mission_id, status")
+        .eq("user_id", session.user.id);
+      
+      if (assignData) setAssignments(assignData);
+
     } catch (error: any) {
       toast({
         title: "Error al iniciar",
@@ -88,18 +101,8 @@ export default function Missions() {
     }
   };
 
-  // Helpers to filter missions
-  const getMissionStatus = (missionId: string) => {
-    const assignment = assignments.find(a => a.mission_id === missionId);
-    return assignment ? assignment.status : "unassigned";
-  };
-
-  const filterMissions = (type: string) => {
-    return missions.filter(m => m.type === type);
-  };
-
-  const MissionList = ({ type }: { type: string }) => {
-    const filtered = filterMissions(type);
+  const renderMissionList = (type: string) => {
+    const filtered = missions.filter(m => m.type === type);
     
     if (filtered.length === 0) {
       return (
@@ -112,7 +115,8 @@ export default function Missions() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((mission) => {
-          const status = getMissionStatus(mission.id);
+          const assignment = assignments.find(a => a.mission_id === mission.id);
+          const status = assignment ? assignment.status : "unassigned";
           const isCompleted = status === "completed";
           const isAssigned = status === "assigned";
           const isStarting = startingId === mission.id;
@@ -210,15 +214,15 @@ export default function Missions() {
             <div className="mb-4 text-sm text-muted-foreground bg-primary/10 p-3 rounded-md border border-primary/20">
                Estas misiones suelen ser rotativas, pero puedes iniciar manualmente las que te interesen hoy.
             </div>
-            <MissionList type="daily" />
+            {renderMissionList("daily")}
           </TabsContent>
           
           <TabsContent value="main" className="mt-6">
-            <MissionList type="main" />
+            {renderMissionList("main")}
           </TabsContent>
           
           <TabsContent value="side" className="mt-6">
-            <MissionList type="side" />
+            {renderMissionList("side")}
           </TabsContent>
         </Tabs>
       </div>

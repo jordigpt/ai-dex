@@ -32,14 +32,12 @@ export default function Admin() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Check admin table
       const { data: adminData } = await supabase
         .from("admins")
         .select("user_id")
         .eq("user_id", session.user.id)
         .maybeSingle();
       
-      // Also allow if email matches hardcoded admin (fallback)
       const isEmailAdmin = session.user.email === "jordithecreative@gmail.com";
 
       if (adminData || isEmailAdmin) {
@@ -57,19 +55,16 @@ export default function Admin() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch missions with relations
       const { data: mData } = await supabase
         .from("missions")
         .select("*, skill:skills(name), track:tracks(name)")
         .order("created_at", { ascending: false });
       
-      // Fetch skills
       const { data: sData } = await supabase
         .from("skills")
         .select("*")
         .order("name");
 
-      // Fetch tracks
       const { data: tData } = await supabase
         .from("tracks")
         .select("*")
@@ -104,7 +99,7 @@ export default function Admin() {
       fetchData();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
-      throw error; // Re-throw to handle state in child component
+      throw error; 
     }
   };
 
@@ -161,14 +156,22 @@ export default function Admin() {
   };
 
   const handleDeleteTrack = async (trackId: string) => {
-    if (!confirm("¿Estás seguro de eliminar este track? Esto puede fallar si hay misiones o usuarios asignados.")) return;
+    if (!confirm("¿Estás seguro de eliminar este track?")) return;
 
     try {
       const { error } = await supabase.from("tracks").delete().eq("id", trackId);
-      if (error) throw error;
+      
+      if (error) {
+        // Manejo específico de error de clave foránea (foreign key violation)
+        if (error.code === '23503') {
+           throw new Error("No se puede eliminar porque tiene misiones o usuarios asignados.");
+        }
+        throw error;
+      }
       
       toast({ title: "Track eliminado correctamente" });
-      fetchData();
+      // Actualizamos el estado local inmediatamente para reflejar el cambio
+      setTracks(prev => prev.filter(t => t.id !== trackId));
     } catch (error: any) {
       toast({ 
         title: "Error eliminando track", 
