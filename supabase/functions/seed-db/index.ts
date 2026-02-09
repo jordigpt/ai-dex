@@ -15,11 +15,11 @@ serve(async (req) => {
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '', // Usamos Service Role para poder borrar/escribir todo
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '', 
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
-    // 1. DEFINICIÓN DE CATÁLOGO DEFINITIVO
+    // 1. DEFINICIÓN DE CATÁLOGO DEFINITIVO (Nombres Corregidos)
     const SKILLS = [
       { name: "Oferta & Copy", description: "Creación de valor, packaging y escritura persuasiva." },
       { name: "Ventas & Outreach", description: "Prospección, negociación y cierre." },
@@ -30,19 +30,19 @@ serve(async (req) => {
 
     const TRACKS = [
       { 
-        name: "Microproductos", 
+        name: "Micro-productos",  // CORREGIDO: Con guión
         description: "Productos digitales de bajo ticket, plantillas y cursos grabados." 
       },
       { 
-        name: "Servicios High-Ticket", 
+        name: "Servicios / Consultoría", // CORREGIDO: Coincide con screenshot
         description: "Agencia B2B, consultoría y servicios 'Done-For-You'." 
       },
       { 
-        name: "Coaching & 1:1", 
+        name: "Sesiones 1:1 / Coaching", // CORREGIDO: Coincide con screenshot
         description: "Mentoría, asesoría personalizada y marca personal." 
       },
       { 
-        name: "Agencia de Automatización", 
+        name: "Agencia de Automatización", // CORREGIDO: Unificado
         description: "Implementación de IA, chatbots y workflows (n8n/Zapier) para empresas." 
       },
       { 
@@ -61,22 +61,23 @@ serve(async (req) => {
     ];
 
     // Misiones Específicas
+    // Nota: Mapeamos los nombres del objeto TRACK_MISSIONS a los nombres reales de los tracks arriba
     const TRACK_MISSIONS = {
-      "Microproductos": [
+      "Micro-productos": [
         { title: "El Problema de 1 Millón de Dólares", description: "Identifica un problema doloroso y urgente que puedas resolver con un PDF de 5 páginas.", type: "side", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
         { title: "Esquema del Lead Magnet", description: "Crea el índice (Table of Contents) de tu producto gratuito o de bajo coste.", type: "main", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
         { title: "Landing Page MVP", description: "Monta una página simple (Notion/Carrd) con: Promesa, 3 Beneficios y Botón de compra/descarga.", type: "main", difficulty: 3, xp: 60, skill: "Tech & Automatización" },
         { title: "3 Hooks de Contenido", description: "Escribe 3 ganchos para TikTok/Reels que ataquen directamente el problema que resuelve tu producto.", type: "daily", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
         { title: "Venta Beta", description: "Consigue que 1 persona te pague (o descargue) tu producto antes de terminarlo al 100%.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
       ],
-      "Servicios High-Ticket": [
+      "Servicios / Consultoría": [
         { title: "Oferta Irresistible", description: "Redacta tu promesa: 'Ayudo a [Nicho] a lograr [Resultado] en [Tiempo] sin [Dolor]'.", type: "main", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
         { title: "Lista de 50 Prospectos", description: "Busca 50 empresas/personas que encajen con tu servicio. Ponlos en un Excel/Notion.", type: "side", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
         { title: "El Loom de Valor", description: "Graba un video de 3-5 min auditando la situación de un prospecto y envíaselo gratis.", type: "daily", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
         { title: "Propuesta Estándar", description: "Crea una plantilla de propuesta PDF que puedas reutilizar. No reinventes la rueda cada vez.", type: "main", difficulty: 3, xp: 60, skill: "Oferta & Copy" },
         { title: "Case Study Express", description: "Escribe un documento de 1 página explicando cómo resolviste un problema similar en el pasado (o cómo lo harías).", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" }
       ],
-      "Coaching & 1:1": [
+      "Sesiones 1:1 / Coaching": [
         { title: "Historia de Origen", description: "Escribe un post/guion contando tu historia de transformación. ¿Por qué eres el guía adecuado?", type: "main", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
         { title: "Estructura de Sesión", description: "Diseña el framework de tu llamada de coaching. ¿Qué pasa en el min 0, 15, 30 y 60?", type: "main", difficulty: 3, xp: 60, skill: "Delivery & Servicio" },
         { title: "Reactivación de Red", description: "Escribe a 5 ex-compañeros o amigos contando qué estás ofreciendo ahora.", type: "side", difficulty: 1, xp: 10, skill: "Ventas & Outreach" },
@@ -101,16 +102,13 @@ serve(async (req) => {
 
     console.log("[seed-db] Starting cleanup...");
 
-    // 2. LIMPIEZA (Ojo: Esto borra misiones y tracks existentes para evitar duplicados)
-    // Primero desvinculamos perfiles de tracks para no romper FKs
+    // 2. LIMPIEZA
     await supabase.from('profiles').update({ track_id: null }).neq('user_id', '00000000-0000-0000-0000-000000000000');
     
-    // Borramos datos dependientes primero
     await supabase.from('user_mission_assignments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('mission_steps').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('missions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     
-    // Borramos catálogo base
     await supabase.from('tracks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('skills').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
@@ -144,7 +142,7 @@ serve(async (req) => {
         difficulty: m.difficulty,
         xp_reward: m.xp,
         skill_id: skillMap[m.skill],
-        track_id: null, // Universal
+        track_id: null,
         is_active: true
       });
     });
@@ -171,7 +169,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Database seeded successfully with normalized tracks and magic missions." 
+      message: "Database seeded successfully with corrected tracks and missions." 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

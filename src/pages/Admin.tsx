@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Filter, Database, AlertTriangle } from "lucide-react";
+import { Loader2, Plus, Filter, Database, AlertTriangle, GitMerge } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +34,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [consolidating, setConsolidating] = useState(false);
   
   // Data State
   const [missions, setMissions] = useState<any[]>([]);
@@ -180,6 +181,32 @@ export default function Admin() {
     }
   };
 
+  const handleConsolidateTracks = async () => {
+    setConsolidating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('consolidate-tracks');
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({ 
+        title: "Tracks Consolidados", 
+        description: `Se han unificado los duplicados. (${data.results.length} operaciones)`,
+        className: "bg-blue-50 border-blue-200"
+      });
+      
+      await fetchData();
+    } catch (error: any) {
+      toast({ 
+        title: "Error al consolidar", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    } finally {
+      setConsolidating(false);
+    }
+  };
+
   // Filter missions
   const filteredMissions = missions.filter(m => {
     if (selectedTrackFilter === "all") return true;
@@ -210,10 +237,20 @@ export default function Admin() {
             <h1 className="text-3xl font-bold">Admin Panel</h1>
             <p className="text-muted-foreground">Gestión de contenido del juego.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button 
+               variant="outline" 
+               className="border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700"
+               onClick={handleConsolidateTracks}
+               disabled={consolidating || seeding}
+            >
+               {consolidating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GitMerge className="mr-2 h-4 w-4" />}
+               Consolidar Tracks
+            </Button>
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" disabled={seeding}>
+                <Button variant="destructive" disabled={seeding || consolidating}>
                   {seeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
                   Reiniciar Catálogo
                 </Button>
