@@ -96,7 +96,20 @@ serve(async (req) => {
         { title: "Batch Recording", description: "Graba 3 videos cortos en una sola sesión de una hora.", type: "main", difficulty: 3, xp: 60, skill: "Contenido & Distribución" },
         { title: "Responder Comentarios", description: "Dedica 15 min a responder comentarios en tus posts o en posts de referentes de tu nicho.", type: "daily", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
         { title: "Optimización de Bio", description: "Reescribe tu biografía: Quién eres + De qué hablas + Prueba social/Link.", type: "side", difficulty: 1, xp: 10, skill: "Oferta & Copy" },
-        { title: "Análisis de Virales", description: "Busca 3 videos virales en tu nicho y escribe por qué funcionaron (Hook, Retención, Payoff).", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" }
+        { title: "Análisis de Virales", description: "Busca 3 videos virales en tu nicho y escribe por qué funcionaron (Hook, Retención, Payoff).", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
+        // NUEVAS MISIONES
+        { title: "Definir 3 Pilares", description: "Define tus 3 temas principales. Ejemplo: IA, Productividad, Negocios. Esto da foco a tu audiencia.", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
+        { title: "Lista de 20 Hooks", description: "Escribe 20 frases de inicio que detengan el scroll. Usa fórmulas como 'Cómo X sin Y' o 'El error #1'.", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
+        { title: "Calendario de 14 Días", description: "Planifica los títulos y formatos de contenido para las próximas 2 semanas. Elimina la decisión diaria.", type: "main", difficulty: 3, xp: 60, skill: "Contenido & Distribución" },
+        { title: "Script DM de Diagnóstico", description: "Crea un guion para DM que identifique el problema del prospecto sin vender. Ej: '¿Estás intentando escalar X o solo empezando?'", type: "side", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
+        { title: "Iniciar 5 Conversaciones", description: "Responde a 5 historias o comentarios con preguntas genuinas para abrir conversaciones.", type: "daily", difficulty: 1, xp: 10, skill: "Ventas & Outreach" },
+        { title: "SOP de Producción Semanal", description: "Escribe el paso a paso de tu proceso creativo: Idea -> Guion -> Grabación -> Edición -> Publicación.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
+        { title: "Ritual de Planificación", description: "Dedica 10 minutos a revisar qué contenido sale mañana y preparar los assets necesarios.", type: "daily", difficulty: 1, xp: 10, skill: "Tech & Automatización" },
+        { title: "Cierre por DM", description: "Consigue tu primera venta (o llamada agendada) puramente a través de chat privado.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
+        { title: "Librería de Assets", description: "Organiza tus carpetas: Logos, Fotos, B-Roll, Música. Ten todo a un clic de distancia.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
+        { title: "Repurpose 1 a 3", description: "Toma tu mejor video/post y conviértelo en: 1 Tweet, 1 Story y 1 Email/LinkedIn post.", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
+        { title: "Checklist de Publicación", description: "Crea una lista de chequeo pre-publicación: ¿Tiene subtítulos? ¿Audio limpio? ¿Link en bio actualizado?", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
+        { title: "Streak de 7 Días", description: "Publica contenido durante 7 días consecutivos sin fallar. La consistencia es el rey.", type: "main", difficulty: 3, xp: 60, skill: "Contenido & Distribución" }
       ]
     };
 
@@ -169,7 +182,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Database seeded successfully with corrected tracks and missions." 
+      message: "Database seeded successfully with updated Creator Engine missions." 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
