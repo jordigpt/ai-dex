@@ -38,76 +38,81 @@ const Login = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            AI-DEX
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Tu companion app para ejecución diaria
-          </p>
-        </div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              AI-DEX
+            </h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Tu companion app para ejecución diaria
+            </p>
+          </div>
 
-        {errorMessage && (
-          <Alert variant="destructive">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{errorMessage}</AlertDescription>
-          </Alert>
-        )}
+          {errorMessage && (
+            <Alert variant="destructive">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          )}
 
-        <Auth
-          supabaseClient={supabase}
-          redirectTo={redirectUrl}
-          appearance={{
-            theme: ThemeSupa,
-            variables: {
-              default: {
-                colors: {
-                  brand: "#000000",
-                  brandAccent: "#333333",
+          <Auth
+            supabaseClient={supabase}
+            redirectTo={redirectUrl}
+            appearance={{
+              theme: ThemeSupa,
+              variables: {
+                default: {
+                  colors: {
+                    brand: "#000000",
+                    brandAccent: "#333333",
+                  },
                 },
               },
-            },
-          }}
-          localization={{
-            variables: {
-              sign_in: {
-                email_label: "Correo electrónico",
-                password_label: "Contraseña",
-                email_input_placeholder: "Tu correo electrónico",
-                password_input_placeholder: "Tu contraseña",
-                button_label: "Iniciar sesión",
-                loading_button_label: "Iniciando sesión...",
-                social_provider_text: "Iniciar con {{provider}}",
-                link_text: "¿Ya tienes cuenta? Inicia sesión",
+            }}
+            localization={{
+              variables: {
+                sign_in: {
+                  email_label: "Correo electrónico",
+                  password_label: "Contraseña",
+                  email_input_placeholder: "Tu correo electrónico",
+                  password_input_placeholder: "Tu contraseña",
+                  button_label: "Iniciar sesión",
+                  loading_button_label: "Iniciando sesión...",
+                  social_provider_text: "Iniciar con {{provider}}",
+                  link_text: "¿Ya tienes cuenta? Inicia sesión",
+                },
+                sign_up: {
+                  email_label: "Correo electrónico",
+                  password_label: "Contraseña",
+                  email_input_placeholder: "Tu correo electrónico",
+                  password_input_placeholder: "Tu contraseña",
+                  button_label: "Registrarse",
+                  loading_button_label: "Registrando...",
+                  social_provider_text: "Registrarse con {{provider}}",
+                  link_text: "¿No tienes cuenta? Regístrate",
+                  confirmation_text: "Revisa tu correo para confirmar tu cuenta",
+                },
+                forgotten_password: {
+                  email_label: "Correo electrónico",
+                  password_label: "Contraseña",
+                  email_input_placeholder: "Tu correo electrónico",
+                  button_label: "Enviar instrucciones",
+                  loading_button_label: "Enviando instrucciones...",
+                  link_text: "¿Olvidaste tu contraseña?",
+                  confirmation_text: "Revisa tu correo para recuperar tu contraseña",
+                },
               },
-              sign_up: {
-                email_label: "Correo electrónico",
-                password_label: "Contraseña",
-                email_input_placeholder: "Tu correo electrónico",
-                password_input_placeholder: "Tu contraseña",
-                button_label: "Registrarse",
-                loading_button_label: "Registrando...",
-                social_provider_text: "Registrarse con {{provider}}",
-                link_text: "¿No tienes cuenta? Regístrate",
-                confirmation_text: "Revisa tu correo para confirmar tu cuenta",
-              },
-              forgotten_password: {
-                email_label: "Correo electrónico",
-                password_label: "Contraseña",
-                email_input_placeholder: "Tu correo electrónico",
-                button_label: "Enviar instrucciones",
-                loading_button_label: "Enviando instrucciones...",
-                link_text: "¿Olvidaste tu contraseña?",
-                confirmation_text: "Revisa tu correo para recuperar tu contraseña",
-              },
-            },
-          }}
-          providers={[]} // No social providers for MVP as per PRD
-          theme="light"
-        />
+            }}
+            providers={[]} // No social providers for MVP as per PRD
+            theme="light"
+          />
+        </div>
       </div>
+      <footer className="py-6 text-center text-sm text-gray-400">
+        By JordiGPT
+      </footer>
     </div>
   );
 };

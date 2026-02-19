@@ -186,10 +186,10 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
       
-      {/* Footer minimalista sin branding */}
+      {/* Footer minimalista */}
       <footer className="border-t py-6 bg-white mt-auto">
         <div className="max-w-5xl mx-auto px-4 text-center text-sm text-gray-400">
-           AI-DEX &copy; {new Date().getFullYear()}
+           AI-DEX &copy; {new Date().getFullYear()} • By JordiGPT
         </div>
       </footer>
     </div>
