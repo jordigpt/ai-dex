@@ -72,7 +72,8 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-gray-50/50 flex flex-col">
       {/* Navbar */}
       <header className="bg-white border-b sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* WIDENED CONTAINER: max-w-7xl instead of 5xl */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Logo & Desktop Nav */}
             <div className="flex">
@@ -82,12 +83,18 @@ export function Layout({ children }: LayoutProps) {
                 </div>
                 <Link 
                   to="/" 
-                  className="text-xl font-bold text-gray-900 tracking-tight hover:opacity-80 transition-opacity"
+                  className="text-xl font-bold text-gray-900 tracking-tight hover:opacity-80 transition-opacity hidden md:block"
                 >
                   AI-DEX
                 </Link>
+                <Link 
+                  to="/" 
+                  className="text-xl font-bold text-gray-900 tracking-tight hover:opacity-80 transition-opacity md:hidden"
+                >
+                  DEX
+                </Link>
               </div>
-              <nav className="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <nav className="hidden lg:ml-8 lg:flex lg:space-x-8">
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -109,8 +116,8 @@ export function Layout({ children }: LayoutProps) {
             </div>
 
             {/* User Menu / Mobile Toggle */}
-            <div className="flex items-center">
-              <div className="hidden sm:flex sm:items-center space-x-2">
+            <div className="flex items-center gap-2">
+              <div className="hidden lg:flex lg:items-center space-x-2">
                 <Button variant="ghost" size="sm" onClick={() => navigate("/settings")} title="Configuración">
                   <Settings className="w-4 h-4" />
                 </Button>
@@ -119,7 +126,7 @@ export function Layout({ children }: LayoutProps) {
                   Salir
                 </Button>
               </div>
-              <div className="-mr-2 flex items-center sm:hidden">
+              <div className="flex items-center lg:hidden">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -138,7 +145,7 @@ export function Layout({ children }: LayoutProps) {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="sm:hidden bg-white border-b shadow-lg">
+          <div className="lg:hidden bg-white border-b shadow-lg">
             <div className="pt-2 pb-3 space-y-1">
               {navItems.map((item) => {
                  const Icon = item.icon;
@@ -183,14 +190,14 @@ export function Layout({ children }: LayoutProps) {
         )}
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content - WIDENED */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
       
       {/* Footer minimalista */}
       <footer className="border-t py-6 bg-white mt-auto">
-        <div className="max-w-5xl mx-auto px-4 text-center text-sm text-gray-400">
+        <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
            AI-DEX &copy; {new Date().getFullYear()} • By JordiGPT
         </div>
       </footer>

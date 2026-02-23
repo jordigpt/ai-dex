@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Zap, Trophy, Flame, Target, BookOpen, Shield, Crown, Activity, TrendingUp } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, Zap, Trophy, Flame, Target, BookOpen, Crown, TrendingUp, ShieldCheck, Star } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Definimos los umbrales de nivel igual que en el backend
 const LEVEL_THRESHOLDS = [
@@ -125,17 +126,17 @@ export default function Stats() {
 
   const trackName = profile?.track?.name || "Novato";
 
-  // Helper component for Attribute Bars
+  // Helper component for Attribute Bars (Light Mode)
   const AttributeBar = ({ label, value, colorClass }: { label: string, value: number, colorClass: string }) => (
     <div className="mb-4">
-      <div className="flex justify-between mb-1">
-        <span className="text-xs font-bold uppercase tracking-wider text-gray-400">{label}</span>
-        <span className="text-xs font-bold text-white">{value} XP</span>
+      <div className="flex justify-between mb-1.5 items-end">
+        <span className="text-xs font-bold uppercase tracking-wider text-gray-500">{label}</span>
+        <span className="text-sm font-bold text-gray-900">{value} XP</span>
       </div>
-      <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+      <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-200">
         <div 
-           className={`h-full ${colorClass}`} 
-           style={{ width: `${Math.min(100, (value / 500) * 100)}%` }} // Visual scaling
+           className={`h-full ${colorClass} transition-all duration-1000`} 
+           style={{ width: `${Math.min(100, (value / 500) * 100)}%` }} 
         />
       </div>
     </div>
@@ -143,183 +144,220 @@ export default function Stats() {
 
   return (
     <Layout>
-      {/* Main Dashboard Container */}
-      <div className="bg-[#0f1115] text-white rounded-3xl p-6 md:p-10 shadow-2xl min-h-[800px] relative overflow-hidden border border-gray-800">
+      <div className="space-y-8 animate-in fade-in duration-500">
         
-        {/* Background Decoration */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
+        {/* HERO SECTION - LIGHT MODE */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
+          {/* Subtle Background Pattern */}
+          <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-30 pointer-events-none" />
           
-          {/* LEFT COLUMN: Identity & Core Stats */}
-          <div className="lg:col-span-3 flex flex-col gap-8">
-            <div>
-              <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter text-white mb-2 leading-none">
-                {profile?.display_name || "Agente"}
-              </h1>
-              <Badge variant="outline" className="border-primary text-primary bg-primary/10 px-3 py-1 text-sm tracking-widest uppercase">
-                {trackName}
-              </Badge>
-            </div>
-
-            {/* Level Badge */}
-            <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10">
-              <div className="relative flex items-center justify-center w-16 h-16">
-                 <svg className="w-full h-full rotate-[-90deg]" viewBox="0 0 36 36">
-                    <path className="text-gray-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                    <path className="text-primary" strokeDasharray={`${progressPercent}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                 </svg>
-                 <span className="absolute text-2xl font-bold">{currentLevel}</span>
-              </div>
-              <div>
-                <div className="text-xs text-gray-400 uppercase tracking-wider">XP Actual</div>
-                <div className="text-2xl font-bold text-white">{currentXP}</div>
-              </div>
-            </div>
-
-            {/* Top Attributes */}
-            <div className="space-y-2">
-               <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4 flex items-center gap-2">
-                  <Zap className="w-4 h-4" /> Top Skills
-               </h3>
-               {skills.slice(0, 4).map((skill, idx) => {
-                  const colors = ["bg-emerald-400", "bg-blue-400", "bg-purple-400", "bg-orange-400"];
-                  return (
-                    <AttributeBar 
-                      key={skill.id} 
-                      label={skill.name} 
-                      value={skill.xp} 
-                      colorClass={colors[idx % colors.length]} 
-                    />
-                  );
-               })}
-            </div>
-          </div>
-
-          {/* CENTER COLUMN: Avatar Showcase */}
-          <div className="lg:col-span-5 flex flex-col justify-end items-center relative min-h-[400px]">
-             {/* Character Glow */}
-             <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent opacity-50 rounded-b-3xl" />
-             
-             <div className="relative z-10 w-full h-full flex items-center justify-center">
-                 {/* Avatar Frame */}
-                 <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 rounded-2xl" />
-                    <img 
-                       src={avatarSrc} 
-                       alt="Avatar" 
-                       className="w-64 h-64 md:w-80 md:h-80 object-cover rendering-pixelated drop-shadow-[0_0_30px_rgba(255,255,255,0.15)] transition-transform duration-500 group-hover:scale-105"
-                       style={{ imageRendering: 'pixelated' }}
-                    />
-                 </div>
-             </div>
-
-             {/* Bottom Status Tickers */}
-             <div className="w-full grid grid-cols-2 gap-4 mt-8">
-                <div className="bg-white/5 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-                   <div className="text-xs text-gray-400 uppercase">Salud del Negocio</div>
-                   <div className="h-2 w-full bg-gray-700 mt-2 rounded-full overflow-hidden">
-                      <div className="h-full bg-green-500 w-[85%]" />
-                   </div>
-                </div>
-                <div className="bg-white/5 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-                   <div className="text-xs text-gray-400 uppercase">Energía Creativa</div>
-                   <div className="h-2 w-full bg-gray-700 mt-2 rounded-full overflow-hidden">
-                      <div className="h-full bg-yellow-400 w-[60%]" />
-                   </div>
-                </div>
-             </div>
-          </div>
-
-          {/* RIGHT COLUMN: Progress & KPIs */}
-          <div className="lg:col-span-4 flex flex-col gap-6">
+          <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 relative z-10">
             
-            {/* KPI Cards Row */}
-            <div className="flex justify-between items-center bg-white/5 rounded-xl p-4 border border-white/10">
-               <div className="text-center px-4 border-r border-white/10 w-1/3">
-                  <div className="flex justify-center mb-2">
-                     <Flame className="w-5 h-5 text-orange-500" />
+            {/* LEFT: Avatar with Holo Effect */}
+            <div className="flex-shrink-0 flex justify-center md:justify-start">
+               <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl transform scale-90 translate-y-4"></div>
+                  <div className="w-48 h-48 md:w-56 md:h-56 rounded-2xl border-4 border-white shadow-xl bg-gray-50 overflow-hidden relative">
+                     <img 
+                        src={avatarSrc} 
+                        alt="Character Avatar" 
+                        className="w-full h-full object-cover rendering-pixelated"
+                        style={{ imageRendering: 'pixelated' }}
+                     />
                   </div>
-                  <div className="text-xl font-bold text-white">{stats?.streak_current || 0}</div>
-                  <div className="text-[10px] text-gray-400 uppercase tracking-wider">Racha</div>
-               </div>
-               <div className="text-center px-4 border-r border-white/10 w-1/3">
-                  <div className="flex justify-center mb-2">
-                     <Trophy className="w-5 h-5 text-yellow-500" />
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
+                     <Badge className="bg-gray-900 text-white border-2 border-white px-3 py-1 text-xs shadow-md uppercase tracking-wider whitespace-nowrap">
+                        Nivel {currentLevel}
+                     </Badge>
                   </div>
-                  <div className="text-xl font-bold text-white">{completionCount}</div>
-                  <div className="text-[10px] text-gray-400 uppercase tracking-wider">Victorias</div>
-               </div>
-               <div className="text-center px-4 w-1/3">
-                  <div className="flex justify-center mb-2">
-                     <Crown className="w-5 h-5 text-purple-500" />
-                  </div>
-                  <div className="text-xl font-bold text-white">{dexUnlockCount}</div>
-                  <div className="text-[10px] text-gray-400 uppercase tracking-wider">Items</div>
                </div>
             </div>
 
-            {/* Other Skills List */}
-            <div className="flex-1 overflow-y-auto pr-2 max-h-[300px]">
-               <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" /> Desarrollo
-               </h3>
-               <div className="space-y-3">
-                  {skills.slice(4).map((skill) => (
-                    <div key={skill.id} className="group">
-                       <div className="flex justify-between text-xs mb-1">
-                          <span className="text-gray-300 group-hover:text-white transition-colors">{skill.name}</span>
-                          <span className="text-gray-500">{skill.xp}</span>
-                       </div>
-                       <Progress value={(skill.xp / 500) * 100} className="h-1 bg-gray-800" />
-                    </div>
-                  ))}
-                  {skills.length < 5 && (
-                     <div className="text-xs text-gray-600 italic">Completa más misiones para desbloquear skills.</div>
-                  )}
+            {/* RIGHT: Main Stats Info */}
+            <div className="flex-1 flex flex-col justify-center space-y-6 text-center md:text-left">
+               <div>
+                  <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                     <Badge variant="outline" className="text-primary-700 bg-primary/10 border-primary/20">
+                        {trackName}
+                     </Badge>
+                     <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3" /> Agente Activo
+                     </span>
+                  </div>
+                  <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-none mb-1">
+                     {profile?.display_name || "Jugador"}
+                  </h1>
                </div>
-            </div>
 
-            {/* Chart Area */}
-            <div className="bg-white/5 p-4 rounded-xl border border-white/10 mt-auto">
-               <div className="flex justify-between items-center mb-4">
-                  <div>
-                     <div className="text-xs text-gray-400 uppercase tracking-wider">Rendimiento (7 Días)</div>
-                     <div className="text-xl font-bold flex items-center gap-2">
-                        +{chartData.reduce((acc, curr) => acc + curr.xp, 0)} XP
-                        <TrendingUp className="w-4 h-4 text-green-500" />
+               {/* XP Progress */}
+               <div className="space-y-2 max-w-xl mx-auto md:mx-0">
+                  <div className="flex justify-between text-sm font-medium">
+                     <span className="text-gray-900 font-bold">{currentXP} XP <span className="text-gray-400 font-normal">Total</span></span>
+                     <span className="text-gray-500">Próximo Nivel: {nextThreshold} XP</span>
+                  </div>
+                  <div className="h-3 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                     <div 
+                        className="h-full bg-primary transition-all duration-1000 ease-out relative"
+                        style={{ width: `${progressPercent}%` }}
+                     >
+                        <div className="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]"></div>
                      </div>
                   </div>
+                  <p className="text-xs text-muted-foreground text-right pt-1">
+                     Faltan {xpRequiredForLevel - xpInLevel} XP para subir de nivel
+                  </p>
                </div>
-               <div className="h-[100px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                     <AreaChart data={chartData}>
-                        <defs>
-                           <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#d4e83a" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#d4e83a" stopOpacity={0}/>
-                           </linearGradient>
-                        </defs>
-                        <Tooltip 
-                           contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', fontSize: '12px' }}
-                           itemStyle={{ color: '#fff' }}
-                           cursor={{ stroke: '#ffffff20' }}
-                        />
-                        <Area 
-                           type="monotone" 
-                           dataKey="xp" 
-                           stroke="#d4e83a" 
-                           fillOpacity={1} 
-                           fill="url(#colorXp)" 
-                           strokeWidth={2}
-                        />
-                     </AreaChart>
-                  </ResponsiveContainer>
+
+               {/* Quick Stats Grid */}
+               <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto md:mx-0 w-full pt-2">
+                  <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 text-center">
+                     <Flame className="w-5 h-5 text-orange-500 mx-auto mb-1" />
+                     <div className="text-xl font-bold text-gray-900">{stats?.streak_current || 0}</div>
+                     <div className="text-[10px] text-orange-600 font-bold uppercase">Racha Días</div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 text-center">
+                     <Target className="w-5 h-5 text-blue-500 mx-auto mb-1" />
+                     <div className="text-xl font-bold text-gray-900">{completionCount}</div>
+                     <div className="text-[10px] text-blue-600 font-bold uppercase">Misiones</div>
+                  </div>
+                  <div className="bg-purple-50 p-3 rounded-lg border border-purple-100 text-center">
+                     <Crown className="w-5 h-5 text-purple-500 mx-auto mb-1" />
+                     <div className="text-xl font-bold text-gray-900">{dexUnlockCount}</div>
+                     <div className="text-[10px] text-purple-600 font-bold uppercase">Items DEX</div>
+                  </div>
                </div>
             </div>
-
           </div>
+        </div>
+
+        {/* BOTTOM GRID SECTION */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+           
+           {/* Column 1: Attributes (Skills) */}
+           <div className="md:col-span-2 space-y-6">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                 <Zap className="w-5 h-5 text-yellow-500 fill-yellow-500" /> Atributos de Personaje
+              </h2>
+              
+              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+                    {skills.slice(0, 6).map((skill, idx) => {
+                        const colors = ["bg-emerald-500", "bg-blue-500", "bg-purple-500", "bg-orange-500"];
+                        return (
+                           <AttributeBar 
+                              key={skill.id} 
+                              label={skill.name} 
+                              value={skill.xp} 
+                              colorClass={colors[idx % colors.length]} 
+                           />
+                        );
+                    })}
+                 </div>
+                 {skills.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                       Completa misiones para desarrollar tus atributos.
+                    </div>
+                 )}
+              </div>
+
+              {/* Chart Section */}
+              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                 <div className="flex justify-between items-center mb-6">
+                    <div>
+                       <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">Rendimiento Semanal</h3>
+                       <p className="text-sm text-muted-foreground">Puntos de XP ganados en los últimos 7 días</p>
+                    </div>
+                    <div className="text-right">
+                       <div className="text-2xl font-black text-gray-900 flex items-center justify-end gap-2">
+                          <TrendingUp className="w-5 h-5 text-green-500" />
+                          +{chartData.reduce((acc, curr) => acc + curr.xp, 0)}
+                       </div>
+                       <div className="text-xs font-bold text-gray-400 uppercase">XP Total Semana</div>
+                    </div>
+                 </div>
+                 
+                 <div className="h-[200px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                       <AreaChart data={chartData}>
+                          <defs>
+                             <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#d4e83a" stopOpacity={0.8}/>
+                                <stop offset="95%" stopColor="#d4e83a" stopOpacity={0}/>
+                             </linearGradient>
+                          </defs>
+                          <Tooltip 
+                             contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                             itemStyle={{ color: '#000', fontWeight: 'bold' }}
+                             cursor={{ stroke: '#d4e83a', strokeWidth: 2 }}
+                          />
+                          <Area 
+                             type="monotone" 
+                             dataKey="xp" 
+                             stroke="#a3b825" 
+                             fillOpacity={1} 
+                             fill="url(#colorXp)" 
+                             strokeWidth={3}
+                          />
+                       </AreaChart>
+                    </ResponsiveContainer>
+                 </div>
+              </div>
+           </div>
+
+           {/* Column 2: Inventory & Badges */}
+           <div className="space-y-6">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                 <BookOpen className="w-5 h-5 text-purple-600" /> Estado de Cuenta
+              </h2>
+
+              {/* Best Streak Card */}
+              <Card className="border-l-4 border-l-orange-500 overflow-hidden relative group">
+                 <div className="absolute right-0 top-0 w-24 h-24 bg-orange-100 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
+                 <CardHeader className="pb-2 relative">
+                    <CardTitle className="text-sm text-muted-foreground uppercase font-bold tracking-wider">Mejor Racha Histórica</CardTitle>
+                 </CardHeader>
+                 <CardContent className="relative">
+                    <div className="flex items-baseline gap-2">
+                       <span className="text-4xl font-black text-gray-900">{stats?.streak_best || 0}</span>
+                       <span className="text-sm font-medium text-gray-500">días seguidos</span>
+                    </div>
+                 </CardContent>
+              </Card>
+
+              {/* Inventory Summary */}
+              <Card>
+                 <CardHeader>
+                    <CardTitle className="text-sm font-bold uppercase text-gray-500">Resumen de Inventario</CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                    <div className="space-y-4">
+                       <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-100">
+                          <div className="flex items-center gap-3">
+                             <div className="bg-white p-2 rounded-md shadow-sm">
+                                <BookOpen className="w-4 h-4 text-purple-600" />
+                             </div>
+                             <div>
+                                <div className="font-bold text-gray-900">Recursos DEX</div>
+                                <div className="text-xs text-purple-600 font-medium">{dexUnlockCount} desbloqueados</div>
+                             </div>
+                          </div>
+                       </div>
+                       
+                       <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
+                          <div className="flex items-center gap-3">
+                             <div className="bg-white p-2 rounded-md shadow-sm">
+                                <Star className="w-4 h-4 text-blue-600" />
+                             </div>
+                             <div>
+                                <div className="font-bold text-gray-900">Logros Totales</div>
+                                <div className="text-xs text-blue-600 font-medium">{completionCount} completados</div>
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                 </CardContent>
+              </Card>
+           </div>
         </div>
       </div>
     </Layout>
