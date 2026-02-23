@@ -68,7 +68,6 @@ serve(async (req) => {
         { title: "Landing Page MVP", description: "Monta una página simple (Notion/Carrd) con: Promesa, 3 Beneficios y Botón de compra/descarga.", type: "main", difficulty: 3, xp: 60, skill: "Tech & Automatización" },
         { title: "3 Hooks de Contenido", description: "Escribe 3 ganchos para TikTok/Reels que ataquen directamente el problema que resuelve tu producto.", type: "daily", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
         { title: "Venta Beta", description: "Consigue que 1 persona te pague (o descargue) tu producto antes de terminarlo al 100%.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
-        // MONETIZACIÓN FINAL
         { title: "Lanzamiento a Lista de Espera", description: "Envía el email de apertura de carrito a los leads que has captado. Es hora de la verdad.", type: "main", difficulty: 3, xp: 60, skill: "Ventas & Outreach" },
         { title: "Objetivo: $100 Facturados", description: "Consigue tus primeros $100 acumulados vendiendo tu micro-producto. Valida que el mercado quiere lo que ofreces.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
       ],
@@ -78,7 +77,6 @@ serve(async (req) => {
         { title: "El Loom de Valor", description: "Graba un video de 3-5 min auditando la situación de un prospecto y envíaselo gratis.", type: "daily", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
         { title: "Propuesta Estándar", description: "Crea una plantilla de propuesta PDF que puedas reutilizar. No reinventes la rueda cada vez.", type: "main", difficulty: 3, xp: 60, skill: "Oferta & Copy" },
         { title: "Case Study Express", description: "Escribe un documento de 1 página explicando cómo resolviste un problema similar en el pasado (o cómo lo harías).", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
-        // MONETIZACIÓN FINAL
         { title: "Enviar Factura #1", description: "Emite y envía tu primera factura real a un cliente comprometido. Usa Stripe, PayPal o transferencia.", type: "main", difficulty: 3, xp: 60, skill: "Tech & Automatización" },
         { title: "Dinero en el Banco", description: "Confirma la recepción de tu primer pago por servicios high-ticket. La validación definitiva.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
       ],
@@ -88,19 +86,8 @@ serve(async (req) => {
         { title: "Reactivación de Red", description: "Escribe a 5 ex-compañeros o amigos contando qué estás ofreciendo ahora.", type: "side", difficulty: 1, xp: 10, skill: "Ventas & Outreach" },
         { title: "Entrevista de Investigación", description: "Agenda una llamada de 15 min con alguien de tu nicho solo para preguntar sus dolores. No vendas.", type: "side", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
         { title: "Publicar Prueba Social", description: "Sube una captura (anonimizada si es necesario) de alguien agradeciéndote por un consejo.", type: "daily", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
-        // MONETIZACIÓN FINAL
         { title: "Venta de Pack 4 Sesiones", description: "Convierte una sesión única en un compromiso de un mes (4 sesiones). Aumenta tu LTV.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
         { title: "High-Ticket Closer", description: "Cierra un programa de coaching de alto valor (> $500) y recibe el pago.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
-      ],
-      "Agencia de Automatización": [
-        { title: "Diagrama de Flujo", description: "Dibuja en papel o Whimsical el proceso actual de un cliente potencial vs. tu solución automatizada.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
-        { title: "Demo de Chatbot", description: "Configura un chatbot básico (Voiceflow/Manychat) que responda 3 preguntas frecuentes.", type: "main", difficulty: 3, xp: 60, skill: "Tech & Automatización" },
-        { title: "Scraping de Leads", description: "Usa una herramienta (Apollo/Instant Data) para sacar 100 leads de e-commerce/inmobiliarias.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
-        { title: "Cálculo de ROI", description: "Crea una calculadora simple: 'Te ahorro X horas al mes = $Y dinero ahorrado'. Úsala en ventas.", type: "side", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
-        { title: "Conectar Webhook", description: "Haz que un formulario envíe datos a Slack/Discord vía Webhook exitosamente.", type: "main", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
-        // MONETIZACIÓN FINAL
-        { title: "Firmar Contrato de Retainer", description: "Consigue que un cliente firme un acuerdo de mantenimiento mensual recurrente (MRR).", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
-        { title: "Cobrar Setup Fee", description: "Recibe el pago inicial (Setup Fee) por la implementación de la automatización en la cuenta bancaria.", type: "main", difficulty: 3, xp: 60, skill: "Ventas & Outreach" }
       ],
       "Creator Engine": [
         { title: "Banco de Ideas", description: "Llena una nota con 20 ideas de contenido crudas. No juzgues, solo escribe.", type: "side", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
@@ -119,9 +106,44 @@ serve(async (req) => {
         { title: "Repurpose 1 a 3", description: "Toma tu mejor video/post y conviértelo en: 1 Tweet, 1 Story y 1 Email/LinkedIn post.", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
         { title: "Checklist de Publicación", description: "Crea una lista de chequeo pre-publicación: ¿Tiene subtítulos? ¿Audio limpio? ¿Link en bio actualizado?", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
         { title: "Streak de 7 Días", description: "Publica contenido durante 7 días consecutivos sin fallar. La consistencia es el rey.", type: "main", difficulty: 3, xp: 60, skill: "Contenido & Distribución" },
-        // MONETIZACIÓN FINAL
         { title: "Primera Comisión de Afiliado", description: "Genera una venta a través de un link de afiliado de una herramienta que recomiendes y uses.", type: "main", difficulty: 3, xp: 60, skill: "Ventas & Outreach" },
         { title: "Cierre por DM / Sponsor", description: "Consigue tu primera venta propia, cliente o acuerdo de patrocinio puramente a través de chat privado.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
+      ],
+
+      // ============================================
+      // TRACK DE AGENCIA DE AUTOMATIZACIÓN (RENOVADO)
+      // ============================================
+      "Agencia de Automatización": [
+        // --- FASE 1: FUNDAMENTOS & TECH (Main Quest Inicial) ---
+        { title: "Nicho & Dolor Específico", description: "No digas 'Hago automatizaciones'. Di: 'Ayudo a Inmobiliarias a cualificar leads en WhatsApp'. Define tu nicho hoy.", type: "main", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
+        { title: "Tu Stack Tecnológico", description: "Elige tus armas: Make vs n8n. OpenAI vs Anthropic. Airtable vs Supabase. Crea cuentas en tu stack elegido.", type: "side", difficulty: 1, xp: 10, skill: "Tech & Automatización" },
+        { title: "Diagrama del 'Caballo de Troya'", description: "Dibuja un proceso simple (ej: Lead Magnet -> Email -> CRM) que puedas regalar o vender muy barato para entrar en un cliente.", type: "main", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
+        
+        // --- FASE 2: CONSTRUCCIÓN DE ACTIVOS (Main Quest Media) ---
+        { title: "Demo de Chatbot/Workflow", description: "Construye un prototipo funcional que resuelva UN problema (ej: agendar citas). Graba un video usándolo.", type: "main", difficulty: 3, xp: 60, skill: "Tech & Automatización" },
+        { title: "Calculadora de Costes Fantasma", description: "Crea un Excel/Sheet simple que calcule: (Horas perdidas x Sueldo hora) = Dinero quemado al mes. Herramienta de venta brutal.", type: "side", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
+        { title: "Landing/PDF de 'Antes vs Después'", description: "Crea un documento visual simple. Izquierda: Caos, Excel manual, estrés. Derecha: Tu sistema, paz, dashboards.", type: "main", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
+        
+        // --- SIDE QUESTS TÉCNICAS (Para ganar credibilidad) ---
+        { title: "Maestría en Webhooks", description: "Conecta dos apps que no tengan integración nativa usando un Webhook y un HTTP Request. La base de todo.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
+        { title: "El 'Error Handler'", description: "Configura un módulo de manejo de errores en Make/n8n que te envíe un email/Slack si el bot falla. Profesionalidad pura.", type: "side", difficulty: 3, xp: 60, skill: "Tech & Automatización" },
+        { title: "Scraping de Leads B2B", description: "Usa Apollo, Instant Data Scraper o Clay para obtener una lista de 50 empresas en tu nicho con emails verificados.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
+        
+        // --- DAILY QUESTS (Hábitos de Agencia) ---
+        { title: "Outreach 'Puedo arreglar eso'", description: "Busca empresas con procesos rotos (ej: formularios lentos) y mándales un video de cómo lo arreglarías.", type: "daily", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
+        { title: "Mantenimiento Preventivo", description: "Entra a tus escenarios de Make/n8n y revisa los logs de ejecución. ¿Algún fallo silencioso?", type: "daily", difficulty: 1, xp: 10, skill: "Tech & Automatización" },
+        { title: "Networking Táctico", description: "Comenta en 3 posts de dueños de negocio en LinkedIn/Twitter aportando una visión de eficiencia/sistemas.", type: "daily", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
+        { title: "10 DMs de Valor", description: "Envía 10 mensajes a tu lista de scraping preguntando si tienen X problema (sin vender la solución aun).", type: "daily", difficulty: 1, xp: 10, skill: "Ventas & Outreach" },
+        
+        // --- FASE 3: MONETIZACIÓN & CIERRE (Main Quest Final) ---
+        { title: "La Reunión de Discovery", description: "Agenda y ejecuta una llamada donde NO vendas. Solo diagnostica el coste de su ineficiencia usando tu calculadora.", type: "main", difficulty: 3, xp: 60, skill: "Ventas & Outreach" },
+        { title: "Propuesta de ROI Infinito", description: "Envía una propuesta donde el precio sea irrelevante comparado con el dinero que van a ahorrar/ganar.", type: "main", difficulty: 3, xp: 60, skill: "Oferta & Copy" },
+        { title: "Cierre del Cliente Beta", description: "Consigue tu primer 'SÍ'. Cobra aunque sea un precio reducido a cambio de un testimonio en video.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
+        
+        // --- FASE 4: EL SANTO GRIAL (Facturación Real) ---
+        { title: "Cobrar Setup Fee (> $500)", description: "Recibe el pago inicial por la implementación. Valida que tu tiempo y expertise tienen valor de mercado.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
+        { title: "El Contrato de Retainer (MRR)", description: "Firma un acuerdo de mantenimiento mensual. Aquí es donde una agencia se vuelve un negocio real y estable.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
+        { title: "Upsell de Funcionalidad", description: "Ofrece una característica extra (ej: dashboard de analítica) a un cliente actual por un pago único adicional.", type: "side", difficulty: 3, xp: 60, skill: "Ventas & Outreach" }
       ]
     };
 
