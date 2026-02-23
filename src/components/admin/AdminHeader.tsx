@@ -1,16 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Loader2, Database, GitMerge, Plus, Target, Layers, RefreshCw } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Loader2, GitMerge, Target, Layers, RefreshCw } from "lucide-react";
 
 interface AdminHeaderProps {
   consolidating: boolean;
