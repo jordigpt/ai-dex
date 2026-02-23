@@ -1,19 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, CheckCircle2, Circle, RefreshCw, Flame, Star, Trophy, ExternalLink, Sparkles } from "lucide-react";
+import { Loader2, CheckCircle2, Circle, Flame, Star, Trophy, ExternalLink, RefreshCw } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { MissionCompletionDialog } from "@/components/MissionCompletionDialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -232,31 +226,7 @@ const Index = () => {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Tu Plan de Hoy</h2>
-            <div className="flex gap-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleGeneratePlan(true)} 
-                      disabled={generating}
-                      className="border-dashed"
-                    >
-                      {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                      Regenerar Plan
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Reemplaza misiones pendientes con nuevas tareas.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              <Button variant="ghost" size="sm" onClick={fetchData} title="Recargar datos">
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
+            {/* Controls removed to prevent re-rolling */}
           </div>
 
           {assignments.length === 0 ? (
