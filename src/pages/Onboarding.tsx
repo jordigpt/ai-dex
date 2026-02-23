@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Target, Clock, Zap, Construction } from "lucide-react";
+import { Loader2, Target, Clock, Zap, Construction, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface Track {
@@ -38,6 +39,7 @@ export default function Onboarding() {
   const [tracks, setTracks] = useState<Track[]>([]);
   
   // Form State
+  const [displayName, setDisplayName] = useState<string>("");
   const [selectedTrack, setSelectedTrack] = useState<string>("");
   const [level, setLevel] = useState<number>(1);
   const [time, setTime] = useState<number>(60);
@@ -58,9 +60,7 @@ export default function Onboarding() {
         .from("tracks")
         .select("id, name, description");
       
-      // 3. Fetch Mission Counts (to detect empty tracks)
-      // Since we can't do a complex join count easily in one go with RLS client sometimes, 
-      // let's fetch all missions ids/track_ids and count in JS for MVP simplicity
+      // 3. Fetch Mission Counts
       const { data: missionsData } = await supabase
         .from("missions")
         .select("track_id")
@@ -94,7 +94,12 @@ export default function Onboarding() {
   }, [navigate, toast]);
 
   const handleNext = () => {
-    if (step === 1 && !selectedTrack) {
+    // Validation Logic
+    if (step === 1 && !displayName.trim()) {
+      toast({ title: "Por favor escribe tu nombre", variant: "destructive" });
+      return;
+    }
+    if (step === 2 && !selectedTrack) {
       toast({ title: "Selecciona un objetivo", variant: "destructive" });
       return;
     }
@@ -113,6 +118,7 @@ export default function Onboarding() {
       const { error } = await supabase
         .from("profiles")
         .update({
+          display_name: displayName,
           track_id: selectedTrack,
           level_initial: level,
           time_daily: time,
@@ -125,7 +131,7 @@ export default function Onboarding() {
 
       toast({
         title: "¡Perfil configurado!",
-        description: "Tu plan de acción está listo.",
+        description: `Bienvenido, ${displayName}. Tu plan está listo.`,
       });
 
       window.location.href = "/"; 
@@ -148,38 +154,68 @@ export default function Onboarding() {
     );
   }
 
+  // Total steps now 4
+  const TOTAL_STEPS = 4;
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center">
       <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl shadow-lg">
+        <Card className="w-full max-w-2xl shadow-lg transition-all duration-300">
           <CardHeader>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-muted-foreground">Paso {step} de 3</span>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-medium text-muted-foreground">Paso {step} de {TOTAL_STEPS}</span>
               <div className="flex space-x-1">
-                {[1, 2, 3].map((i) => (
+                {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
                   <div
                     key={i}
-                    className={`h-2 w-8 rounded-full ${
-                      i <= step ? "bg-primary" : "bg-gray-200"
+                    className={`h-2 w-8 rounded-full transition-colors duration-300 ${
+                      i + 1 <= step ? "bg-primary" : "bg-gray-200"
                     }`}
                   />
                 ))}
               </div>
             </div>
             <CardTitle className="text-2xl">
-              {step === 1 && "Elige tu Objetivo Principal"}
-              {step === 2 && "Define tu Nivel Actual"}
-              {step === 3 && "¿Cuánto tiempo tienes?"}
+              {step === 1 && "Identidad del Agente"}
+              {step === 2 && "Elige tu Objetivo Principal"}
+              {step === 3 && "Define tu Nivel Actual"}
+              {step === 4 && "¿Cuánto tiempo tienes?"}
             </CardTitle>
             <CardDescription>
-              {step === 1 && "Selecciona el 'Track' que mejor describe lo que quieres lograr."}
-              {step === 2 && "Esto nos ayuda a calibrar la dificultad de tus misiones."}
-              {step === 3 && "Sé honesto. La consistencia gana a la intensidad."}
+              {step === 1 && "¿Cómo quieres que te llamemos en esta misión?"}
+              {step === 2 && "Selecciona el 'Track' que mejor describe lo que quieres lograr."}
+              {step === 3 && "Esto nos ayuda a calibrar la dificultad de tus misiones."}
+              {step === 4 && "Sé honesto. La consistencia gana a la intensidad."}
             </CardDescription>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="min-h-[300px] flex flex-col justify-center">
             {step === 1 && (
+               <div className="space-y-6">
+                  <div className="flex justify-center mb-6">
+                    <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center">
+                       <User className="w-12 h-12 text-primary" />
+                    </div>
+                  </div>
+                  <div className="space-y-2 max-w-md mx-auto">
+                     <Label htmlFor="name" className="text-base">Nombre o Alias</Label>
+                     <Input 
+                        id="name" 
+                        placeholder="Ej. CyberPunk2077, Jordi, Agente Smith..." 
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        className="text-lg h-12"
+                        autoFocus
+                        onKeyDown={(e) => e.key === "Enter" && displayName.trim() && handleNext()}
+                     />
+                     <p className="text-xs text-muted-foreground pt-2">
+                        Este nombre será visible en futuras funcionalidades sociales y rankings.
+                     </p>
+                  </div>
+               </div>
+            )}
+
+            {step === 2 && (
               <RadioGroup value={selectedTrack} onValueChange={setSelectedTrack} className="space-y-3">
                 {tracks.map((track) => (
                   <div key={track.id} className="relative">
@@ -187,8 +223,6 @@ export default function Onboarding() {
                       value={track.id}
                       id={track.id}
                       className="peer sr-only"
-                      // Optional: Disable if you don't want them to pick empty tracks
-                      // disabled={track.mission_count === 0}
                     />
                     <Label
                       htmlFor={track.id}
@@ -213,7 +247,7 @@ export default function Onboarding() {
               </RadioGroup>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
               <div className="space-y-6 py-4">
                 <RadioGroup value={level.toString()} onValueChange={(v) => setLevel(parseInt(v))} className="space-y-4">
                    {LEVELS.map((lvl) => (
@@ -237,7 +271,7 @@ export default function Onboarding() {
               </div>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <div className="space-y-8 py-8 px-2">
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {TIMES.map((t) => (
@@ -277,7 +311,7 @@ export default function Onboarding() {
             )}
           </CardContent>
 
-          <CardFooter className="flex justify-between">
+          <CardFooter className="flex justify-between mt-4">
             <Button
               variant="outline"
               onClick={handleBack}
@@ -286,8 +320,8 @@ export default function Onboarding() {
               Atrás
             </Button>
             
-            {step < 3 ? (
-              <Button onClick={handleNext} disabled={!selectedTrack && step === 1}>
+            {step < TOTAL_STEPS ? (
+              <Button onClick={handleNext} disabled={(step === 1 && !displayName) || (step === 2 && !selectedTrack)}>
                 Siguiente
               </Button>
             ) : (
