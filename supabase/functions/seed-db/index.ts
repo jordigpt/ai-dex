@@ -19,6 +19,43 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
+    // === PASO 0: AUTO-CORRECCIÓN DE NOMBRES DE TRACKS ===
+    // Esto asegura que si el usuario tiene "Agencia / Automatización", se renombre a "Agencia de Automatización"
+    // ANTES de intentar insertar las misiones, para que las encuentre.
+    console.log("Iniciando auto-corrección de tracks...");
+    const RENAMES = [
+      { bad: 'Agencia / Automatización', good: 'Agencia de Automatización' },
+      { bad: 'Agencia Automatización', good: 'Agencia de Automatización' },
+      { bad: 'Microproductos', good: 'Micro-productos' },
+      { bad: '1:1 / Coaching', good: 'Sesiones 1:1 / Coaching' }
+    ];
+
+    for (const item of RENAMES) {
+      // Buscamos si existe el track con el nombre "malo"
+      const { data: badTracks } = await supabase.from('tracks').select('id').eq('name', item.bad);
+      
+      if (badTracks && badTracks.length > 0) {
+        // Buscamos si ya existe el "bueno"
+        const { data: goodTracks } = await supabase.from('tracks').select('id').eq('name', item.good);
+        
+        if (goodTracks && goodTracks.length > 0) {
+           // Si AMBOS existen, movemos las cosas al bueno y borramos el malo (mini-consolidación)
+           const goodId = goodTracks[0].id;
+           for (const badTrack of badTracks) {
+              await supabase.from('missions').update({ track_id: goodId }).eq('track_id', badTrack.id);
+              await supabase.from('profiles').update({ track_id: goodId }).eq('track_id', badTrack.id);
+              await supabase.from('tracks').delete().eq('id', badTrack.id);
+           }
+        } else {
+           // Si solo existe el malo, simplemente lo renombramos
+           for (const badTrack of badTracks) {
+              await supabase.from('tracks').update({ name: item.good }).eq('id', badTrack.id);
+           }
+        }
+      }
+    }
+
+
     // 1. DEFINICIÓN DE CATÁLOGO DEFINITIVO
     const SKILLS = [
       { name: "Oferta & Copy", description: "Creación de valor, packaging y escritura persuasiva." },
@@ -152,7 +189,7 @@ serve(async (req) => {
 
     console.log("[seed-db] Starting smart sync...");
 
-    // 1. SKILLS
+    // 2. SKILLS
     const skillMap = {};
     const { data: existingSkills } = await supabase.from('skills').select('id, name');
     const existingSkillMap = existingSkills ? Object.fromEntries(existingSkills.map(s => [s.name, s.id])) : {};
@@ -167,7 +204,8 @@ serve(async (req) => {
       }
     }
 
-    // 2. TRACKS
+    // 3. TRACKS
+    // Refrescamos tracks después de la auto-corrección
     const trackMap = {};
     const { data: existingTracks } = await supabase.from('tracks').select('id, name');
     const existingTrackMap = existingTracks ? Object.fromEntries(existingTracks.map(t => [t.name, t.id])) : {};
@@ -182,9 +220,7 @@ serve(async (req) => {
        }
     }
 
-    // 3. MISIONES
-    // Obtener todas las misiones existentes para evitar duplicados por título
-    // Esto es "costoso" si hay muchas, pero para un seed funciona.
+    // 4. MISIONES
     const { data: existingMissions } = await supabase.from('missions').select('title, track_id');
     const existingMissionSet = new Set(
        existingMissions?.map(m => `${m.title}-${m.track_id || 'null'}`) || []
@@ -236,7 +272,6 @@ serve(async (req) => {
     }
 
     if (missionsToInsert.length > 0) {
-       // Insertar en bloques de 50 para seguridad
        const chunkSize = 50;
        for (let i = 0; i < missionsToInsert.length; i += chunkSize) {
           const chunk = missionsToInsert.slice(i, i + chunkSize);
@@ -248,7 +283,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: `Database synced. Added ${insertedCount} new missions. Skipped ${skippedCount} existing.`,
+      message: `Sync completado. ${insertedCount} misiones nuevas. ${skippedCount} existentes. Tracks corregidos.`,
       stats: { inserted: insertedCount, skipped: skippedCount }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
