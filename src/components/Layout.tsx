@@ -11,7 +11,8 @@ import {
   Target,
   Zap,
   Settings,
-  Shield
+  Shield,
+  UserCircle
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -55,6 +56,7 @@ export function Layout({ children }: LayoutProps) {
   const navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard },
     { label: "Misiones", href: "/missions", icon: Target },
+    { label: "Stats", href: "/stats", icon: UserCircle },
     { label: "Skills", href: "/skills", icon: Zap },
     { label: "Notas", href: "/notes", icon: StickyNote },
     { label: "DEX", href: "/dex", icon: Book },

@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Missions from "./pages/Missions";
 import MissionDetail from "./pages/MissionDetail";
 import Skills from "./pages/Skills";
+import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -74,6 +75,15 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Index />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/stats"
+            element={
+              <ProtectedRoute>
+                <Stats />
               </ProtectedRoute>
             }
           />
