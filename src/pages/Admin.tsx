@@ -6,8 +6,10 @@ import { Loader2 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { TracksManager } from "@/components/admin/TracksManager";
 import { MissionsManager } from "@/components/admin/MissionsManager";
+import { UsersManager } from "@/components/admin/UsersManager";
 import { CreateMissionDialog } from "@/components/admin/CreateMissionDialog";
 import { CreateTrackDialog } from "@/components/admin/CreateTrackDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -20,6 +22,8 @@ export default function Admin() {
   const [missions, setMissions] = useState<any[]>([]);
   const [skills, setSkills] = useState<any[]>([]);
   const [tracks, setTracks] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
   
   // Dialog State
   const [isMissionDialogOpen, setIsMissionDialogOpen] = useState(false);
@@ -45,6 +49,7 @@ export default function Admin() {
       if (adminData || isEmailAdmin) {
         setIsAdmin(true);
         fetchData();
+        fetchUsers();
       } else {
         setLoading(false);
       }
@@ -79,6 +84,26 @@ export default function Admin() {
       toast({ title: "Error loading data", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-get-users');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      
+      setUsers(data.users || []);
+    } catch (error: any) {
+      console.error("Error fetching users:", error);
+      toast({ 
+        title: "Error cargando usuarios", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    } finally {
+      setUsersLoading(false);
     }
   };
 
@@ -226,15 +251,31 @@ export default function Admin() {
           onOpenCreateTrack={() => setIsTrackDialogOpen(true)}
         />
 
-        <TracksManager 
-          tracks={tracks}
-          onDeleteTrack={handleDeleteTrack}
-        />
+        <Tabs defaultValue="users" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="users">Usuarios</TabsTrigger>
+                <TabsTrigger value="missions">Misiones</TabsTrigger>
+                <TabsTrigger value="tracks">Tracks</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="users" className="mt-6">
+                <UsersManager users={users} loading={usersLoading} />
+            </TabsContent>
 
-        <MissionsManager 
-          missions={missions}
-          tracks={tracks}
-        />
+            <TabsContent value="missions" className="mt-6">
+                 <MissionsManager 
+                    missions={missions}
+                    tracks={tracks}
+                />
+            </TabsContent>
+
+            <TabsContent value="tracks" className="mt-6">
+                <TracksManager 
+                    tracks={tracks}
+                    onDeleteTrack={handleDeleteTrack}
+                />
+            </TabsContent>
+        </Tabs>
 
         <CreateMissionDialog
           isOpen={isMissionDialogOpen}
