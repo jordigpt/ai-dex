@@ -153,15 +153,15 @@ export default function Admin() {
       if (data?.error) throw new Error(data.error);
 
       toast({ 
-        title: "Base de datos restaurada", 
-        description: "Tracks unificados y nuevas misiones generadas.",
+        title: "Catálogo Sincronizado", 
+        description: data.message || "Se han añadido las nuevas misiones.",
         className: "bg-green-50 border-green-200"
       });
       
       await fetchData();
     } catch (error: any) {
       toast({ 
-        title: "Error al restaurar", 
+        title: "Error al sincronizar", 
         description: error.message, 
         variant: "destructive" 
       });
@@ -179,8 +179,10 @@ export default function Admin() {
       if (data?.error) throw new Error(data.error);
 
       toast({ 
-        title: "Tracks Consolidados", 
-        description: `Se han unificado los duplicados. (${data.results.length} operaciones)`,
+        title: "Tracks Unificados", 
+        description: data.results.length > 0 
+          ? `Se corrigieron ${data.results.length} tracks.` 
+          : "Todo estaba en orden.",
         className: "bg-blue-50 border-blue-200"
       });
       

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Loader2, Database, GitMerge, Plus, Target, Layers } from "lucide-react";
+import { Loader2, Database, GitMerge, Plus, Target, Layers, RefreshCw } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +11,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Separator } from "@/components/ui/separator";
 
 interface AdminHeaderProps {
   consolidating: boolean;
@@ -54,6 +53,7 @@ export function AdminHeader({
 
         <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
            <span className="text-sm font-semibold text-gray-500 mr-2">Mantenimiento:</span>
+           
            <Button
             variant="outline"
             className="border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700"
@@ -65,38 +65,22 @@ export function AdminHeader({
             ) : (
               <GitMerge className="mr-2 h-4 w-4" />
             )}
-            Consolidar
+            1. Consolidar Tracks
           </Button>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50" disabled={seeding || consolidating}>
-                {seeding ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Database className="mr-2 h-4 w-4" />
-                )}
-                Reset DB
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>¡Zona de Peligro!</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esto restaurará la base de datos al estado inicial (Seed). Se borrarán misiones personalizadas y progreso.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={onSeed}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  Sí, restaurar
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button 
+            variant="outline" 
+            className="border-green-200 bg-green-50 hover:bg-green-100 text-green-700" 
+            onClick={onSeed}
+            disabled={seeding || consolidating}
+          >
+            {seeding ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            2. Sincronizar Misiones
+          </Button>
         </div>
       </div>
     </div>
