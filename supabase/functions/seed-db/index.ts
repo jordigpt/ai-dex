@@ -19,7 +19,7 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
-    // 1. DEFINICIÓN DE CATÁLOGO DEFINITIVO (Nombres Corregidos)
+    // 1. DEFINICIÓN DE CATÁLOGO DEFINITIVO
     const SKILLS = [
       { name: "Oferta & Copy", description: "Creación de valor, packaging y escritura persuasiva." },
       { name: "Ventas & Outreach", description: "Prospección, negociación y cierre." },
@@ -30,19 +30,19 @@ serve(async (req) => {
 
     const TRACKS = [
       { 
-        name: "Micro-productos",  // CORREGIDO: Con guión
+        name: "Micro-productos", 
         description: "Productos digitales de bajo ticket, plantillas y cursos grabados." 
       },
       { 
-        name: "Servicios / Consultoría", // CORREGIDO: Coincide con screenshot
+        name: "Servicios / Consultoría", 
         description: "Agencia B2B, consultoría y servicios 'Done-For-You'." 
       },
       { 
-        name: "Sesiones 1:1 / Coaching", // CORREGIDO: Coincide con screenshot
+        name: "Sesiones 1:1 / Coaching", 
         description: "Mentoría, asesoría personalizada y marca personal." 
       },
       { 
-        name: "Agencia de Automatización", // CORREGIDO: Unificado
+        name: "Agencia de Automatización", 
         description: "Implementación de IA, chatbots y workflows (n8n/Zapier) para empresas." 
       },
       { 
@@ -61,35 +61,46 @@ serve(async (req) => {
     ];
 
     // Misiones Específicas
-    // Nota: Mapeamos los nombres del objeto TRACK_MISSIONS a los nombres reales de los tracks arriba
     const TRACK_MISSIONS = {
       "Micro-productos": [
         { title: "El Problema de 1 Millón de Dólares", description: "Identifica un problema doloroso y urgente que puedas resolver con un PDF de 5 páginas.", type: "side", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
         { title: "Esquema del Lead Magnet", description: "Crea el índice (Table of Contents) de tu producto gratuito o de bajo coste.", type: "main", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
         { title: "Landing Page MVP", description: "Monta una página simple (Notion/Carrd) con: Promesa, 3 Beneficios y Botón de compra/descarga.", type: "main", difficulty: 3, xp: 60, skill: "Tech & Automatización" },
         { title: "3 Hooks de Contenido", description: "Escribe 3 ganchos para TikTok/Reels que ataquen directamente el problema que resuelve tu producto.", type: "daily", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
-        { title: "Venta Beta", description: "Consigue que 1 persona te pague (o descargue) tu producto antes de terminarlo al 100%.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
+        { title: "Venta Beta", description: "Consigue que 1 persona te pague (o descargue) tu producto antes de terminarlo al 100%.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
+        // MONETIZACIÓN FINAL
+        { title: "Lanzamiento a Lista de Espera", description: "Envía el email de apertura de carrito a los leads que has captado. Es hora de la verdad.", type: "main", difficulty: 3, xp: 60, skill: "Ventas & Outreach" },
+        { title: "Objetivo: $100 Facturados", description: "Consigue tus primeros $100 acumulados vendiendo tu micro-producto. Valida que el mercado quiere lo que ofreces.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
       ],
       "Servicios / Consultoría": [
         { title: "Oferta Irresistible", description: "Redacta tu promesa: 'Ayudo a [Nicho] a lograr [Resultado] en [Tiempo] sin [Dolor]'.", type: "main", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
         { title: "Lista de 50 Prospectos", description: "Busca 50 empresas/personas que encajen con tu servicio. Ponlos en un Excel/Notion.", type: "side", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
         { title: "El Loom de Valor", description: "Graba un video de 3-5 min auditando la situación de un prospecto y envíaselo gratis.", type: "daily", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
         { title: "Propuesta Estándar", description: "Crea una plantilla de propuesta PDF que puedas reutilizar. No reinventes la rueda cada vez.", type: "main", difficulty: 3, xp: 60, skill: "Oferta & Copy" },
-        { title: "Case Study Express", description: "Escribe un documento de 1 página explicando cómo resolviste un problema similar en el pasado (o cómo lo harías).", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" }
+        { title: "Case Study Express", description: "Escribe un documento de 1 página explicando cómo resolviste un problema similar en el pasado (o cómo lo harías).", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
+        // MONETIZACIÓN FINAL
+        { title: "Enviar Factura #1", description: "Emite y envía tu primera factura real a un cliente comprometido. Usa Stripe, PayPal o transferencia.", type: "main", difficulty: 3, xp: 60, skill: "Tech & Automatización" },
+        { title: "Dinero en el Banco", description: "Confirma la recepción de tu primer pago por servicios high-ticket. La validación definitiva.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
       ],
       "Sesiones 1:1 / Coaching": [
         { title: "Historia de Origen", description: "Escribe un post/guion contando tu historia de transformación. ¿Por qué eres el guía adecuado?", type: "main", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
         { title: "Estructura de Sesión", description: "Diseña el framework de tu llamada de coaching. ¿Qué pasa en el min 0, 15, 30 y 60?", type: "main", difficulty: 3, xp: 60, skill: "Delivery & Servicio" },
         { title: "Reactivación de Red", description: "Escribe a 5 ex-compañeros o amigos contando qué estás ofreciendo ahora.", type: "side", difficulty: 1, xp: 10, skill: "Ventas & Outreach" },
         { title: "Entrevista de Investigación", description: "Agenda una llamada de 15 min con alguien de tu nicho solo para preguntar sus dolores. No vendas.", type: "side", difficulty: 2, xp: 25, skill: "Oferta & Copy" },
-        { title: "Publicar Prueba Social", description: "Sube una captura (anonimizada si es necesario) de alguien agradeciéndote por un consejo.", type: "daily", difficulty: 1, xp: 10, skill: "Contenido & Distribución" }
+        { title: "Publicar Prueba Social", description: "Sube una captura (anonimizada si es necesario) de alguien agradeciéndote por un consejo.", type: "daily", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
+        // MONETIZACIÓN FINAL
+        { title: "Venta de Pack 4 Sesiones", description: "Convierte una sesión única en un compromiso de un mes (4 sesiones). Aumenta tu LTV.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
+        { title: "High-Ticket Closer", description: "Cierra un programa de coaching de alto valor (> $500) y recibe el pago.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
       ],
       "Agencia de Automatización": [
         { title: "Diagrama de Flujo", description: "Dibuja en papel o Whimsical el proceso actual de un cliente potencial vs. tu solución automatizada.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
         { title: "Demo de Chatbot", description: "Configura un chatbot básico (Voiceflow/Manychat) que responda 3 preguntas frecuentes.", type: "main", difficulty: 3, xp: 60, skill: "Tech & Automatización" },
         { title: "Scraping de Leads", description: "Usa una herramienta (Apollo/Instant Data) para sacar 100 leads de e-commerce/inmobiliarias.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
         { title: "Cálculo de ROI", description: "Crea una calculadora simple: 'Te ahorro X horas al mes = $Y dinero ahorrado'. Úsala en ventas.", type: "side", difficulty: 2, xp: 25, skill: "Ventas & Outreach" },
-        { title: "Conectar Webhook", description: "Haz que un formulario envíe datos a Slack/Discord vía Webhook exitosamente.", type: "main", difficulty: 2, xp: 25, skill: "Tech & Automatización" }
+        { title: "Conectar Webhook", description: "Haz que un formulario envíe datos a Slack/Discord vía Webhook exitosamente.", type: "main", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
+        // MONETIZACIÓN FINAL
+        { title: "Firmar Contrato de Retainer", description: "Consigue que un cliente firme un acuerdo de mantenimiento mensual recurrente (MRR).", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
+        { title: "Cobrar Setup Fee", description: "Recibe el pago inicial (Setup Fee) por la implementación de la automatización en la cuenta bancaria.", type: "main", difficulty: 3, xp: 60, skill: "Ventas & Outreach" }
       ],
       "Creator Engine": [
         { title: "Banco de Ideas", description: "Llena una nota con 20 ideas de contenido crudas. No juzgues, solo escribe.", type: "side", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
@@ -97,7 +108,6 @@ serve(async (req) => {
         { title: "Responder Comentarios", description: "Dedica 15 min a responder comentarios en tus posts o en posts de referentes de tu nicho.", type: "daily", difficulty: 1, xp: 10, skill: "Contenido & Distribución" },
         { title: "Optimización de Bio", description: "Reescribe tu biografía: Quién eres + De qué hablas + Prueba social/Link.", type: "side", difficulty: 1, xp: 10, skill: "Oferta & Copy" },
         { title: "Análisis de Virales", description: "Busca 3 videos virales en tu nicho y escribe por qué funcionaron (Hook, Retención, Payoff).", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
-        // NUEVAS MISIONES
         { title: "Definir 3 Pilares", description: "Define tus 3 temas principales. Ejemplo: IA, Productividad, Negocios. Esto da foco a tu audiencia.", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
         { title: "Lista de 20 Hooks", description: "Escribe 20 frases de inicio que detengan el scroll. Usa fórmulas como 'Cómo X sin Y' o 'El error #1'.", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
         { title: "Calendario de 14 Días", description: "Planifica los títulos y formatos de contenido para las próximas 2 semanas. Elimina la decisión diaria.", type: "main", difficulty: 3, xp: 60, skill: "Contenido & Distribución" },
@@ -105,23 +115,28 @@ serve(async (req) => {
         { title: "Iniciar 5 Conversaciones", description: "Responde a 5 historias o comentarios con preguntas genuinas para abrir conversaciones.", type: "daily", difficulty: 1, xp: 10, skill: "Ventas & Outreach" },
         { title: "SOP de Producción Semanal", description: "Escribe el paso a paso de tu proceso creativo: Idea -> Guion -> Grabación -> Edición -> Publicación.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
         { title: "Ritual de Planificación", description: "Dedica 10 minutos a revisar qué contenido sale mañana y preparar los assets necesarios.", type: "daily", difficulty: 1, xp: 10, skill: "Tech & Automatización" },
-        { title: "Cierre por DM", description: "Consigue tu primera venta (o llamada agendada) puramente a través de chat privado.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" },
         { title: "Librería de Assets", description: "Organiza tus carpetas: Logos, Fotos, B-Roll, Música. Ten todo a un clic de distancia.", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
         { title: "Repurpose 1 a 3", description: "Toma tu mejor video/post y conviértelo en: 1 Tweet, 1 Story y 1 Email/LinkedIn post.", type: "side", difficulty: 2, xp: 25, skill: "Contenido & Distribución" },
         { title: "Checklist de Publicación", description: "Crea una lista de chequeo pre-publicación: ¿Tiene subtítulos? ¿Audio limpio? ¿Link en bio actualizado?", type: "side", difficulty: 2, xp: 25, skill: "Tech & Automatización" },
-        { title: "Streak de 7 Días", description: "Publica contenido durante 7 días consecutivos sin fallar. La consistencia es el rey.", type: "main", difficulty: 3, xp: 60, skill: "Contenido & Distribución" }
+        { title: "Streak de 7 Días", description: "Publica contenido durante 7 días consecutivos sin fallar. La consistencia es el rey.", type: "main", difficulty: 3, xp: 60, skill: "Contenido & Distribución" },
+        // MONETIZACIÓN FINAL
+        { title: "Primera Comisión de Afiliado", description: "Genera una venta a través de un link de afiliado de una herramienta que recomiendes y uses.", type: "main", difficulty: 3, xp: 60, skill: "Ventas & Outreach" },
+        { title: "Cierre por DM / Sponsor", description: "Consigue tu primera venta propia, cliente o acuerdo de patrocinio puramente a través de chat privado.", type: "main", difficulty: 4, xp: 120, skill: "Ventas & Outreach" }
       ]
     };
 
     console.log("[seed-db] Starting cleanup...");
 
     // 2. LIMPIEZA
+    // Desvincular perfiles antes de borrar tracks
     await supabase.from('profiles').update({ track_id: null }).neq('user_id', '00000000-0000-0000-0000-000000000000');
     
+    // Borrar datos dependientes
     await supabase.from('user_mission_assignments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('mission_steps').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('missions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     
+    // Borrar maestros
     await supabase.from('tracks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('skills').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
@@ -182,7 +197,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Database seeded successfully with updated Creator Engine missions." 
+      message: "Database seeded successfully with monetization quests." 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
