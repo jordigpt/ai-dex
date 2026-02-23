@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Zap, Trophy, Flame, Target, BookOpen, Crown, TrendingUp, ShieldCheck, Star } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, Tooltip, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 // Definimos los umbrales de nivel igual que en el backend
 const LEVEL_THRESHOLDS = [
@@ -146,137 +146,146 @@ export default function Stats() {
     <Layout>
       <div className="space-y-8 animate-in fade-in duration-500">
         
-        {/* HERO SECTION - LIGHT MODE */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
-          {/* Subtle Background Pattern */}
-          <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-30 pointer-events-none" />
+        {/* HERO SECTION - REIMAGINED FOR FULL BODY AVATAR */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col md:flex-row min-h-[400px]">
           
-          <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 relative z-10">
-            
-            {/* LEFT: Avatar with Holo Effect */}
-            <div className="flex-shrink-0 flex justify-center md:justify-start">
-               <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl transform scale-90 translate-y-4"></div>
-                  <div className="w-48 h-48 md:w-56 md:h-56 rounded-2xl border-4 border-white shadow-xl bg-gray-50 overflow-hidden relative">
-                     <img 
-                        src={avatarSrc} 
-                        alt="Character Avatar" 
-                        className="w-full h-full object-cover rendering-pixelated"
-                        style={{ imageRendering: 'pixelated' }}
-                     />
-                  </div>
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
-                     <Badge className="bg-gray-900 text-white border-2 border-white px-3 py-1 text-xs shadow-md uppercase tracking-wider whitespace-nowrap">
-                        Nivel {currentLevel}
-                     </Badge>
-                  </div>
-               </div>
-            </div>
+          {/* LEFT: AVATAR SHOWCASE (PROTAGONIST) */}
+          <div className="w-full md:w-5/12 lg:w-1/3 bg-gray-50 relative flex items-end justify-center border-b md:border-b-0 md:border-r border-gray-200 overflow-hidden group">
+             {/* Background Grid Pattern */}
+             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+             
+             {/* Decorative Elements */}
+             <div className="absolute top-6 left-6">
+                <Badge variant="outline" className="bg-white/80 backdrop-blur border-gray-300 text-gray-600 font-mono text-xs">
+                   ID: {profile?.user_id?.slice(0, 8).toUpperCase()}
+                </Badge>
+             </div>
+             
+             {/* Center Glow */}
+             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-primary/20 rounded-full blur-[60px]" />
 
-            {/* RIGHT: Main Stats Info */}
-            <div className="flex-1 flex flex-col justify-center space-y-6 text-center md:text-left">
-               <div>
-                  <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                     <Badge variant="outline" className="text-primary-700 bg-primary/10 border-primary/20">
-                        {trackName}
-                     </Badge>
-                     <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3" /> Agente Activo
-                     </span>
-                  </div>
-                  <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-none mb-1">
-                     {profile?.display_name || "Jugador"}
-                  </h1>
-               </div>
+             {/* THE AVATAR - FULL BODY */}
+             <div className="relative z-10 h-[380px] w-full flex items-end justify-center pb-0 transition-transform duration-700 md:group-hover:scale-105">
+                <img 
+                   src={avatarSrc} 
+                   alt="Character Avatar" 
+                   className="h-full w-auto object-contain drop-shadow-2xl"
+                   style={{ imageRendering: 'pixelated' }}
+                />
+             </div>
+          </div>
 
-               {/* XP Progress */}
-               <div className="space-y-2 max-w-xl mx-auto md:mx-0">
-                  <div className="flex justify-between text-sm font-medium">
-                     <span className="text-gray-900 font-bold">{currentXP} XP <span className="text-gray-400 font-normal">Total</span></span>
-                     <span className="text-gray-500">Próximo Nivel: {nextThreshold} XP</span>
-                  </div>
-                  <div className="h-3 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
-                     <div 
-                        className="h-full bg-primary transition-all duration-1000 ease-out relative"
-                        style={{ width: `${progressPercent}%` }}
-                     >
-                        <div className="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]"></div>
-                     </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground text-right pt-1">
-                     Faltan {xpRequiredForLevel - xpInLevel} XP para subir de nivel
-                  </p>
-               </div>
+          {/* RIGHT: STATS & INFO */}
+          <div className="flex-1 p-6 md:p-10 flex flex-col justify-center">
+             
+             {/* Header */}
+             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                   <div className="flex items-center gap-2 mb-2">
+                      <Badge className="bg-primary text-black hover:bg-primary/90 font-bold border-none">
+                         Nivel {currentLevel}
+                      </Badge>
+                      <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                         {trackName}
+                      </span>
+                   </div>
+                   <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                      {profile?.display_name || "Agente"}
+                   </h1>
+                </div>
 
-               {/* Quick Stats Grid */}
-               <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto md:mx-0 w-full pt-2">
-                  <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 text-center">
-                     <Flame className="w-5 h-5 text-orange-500 mx-auto mb-1" />
-                     <div className="text-xl font-bold text-gray-900">{stats?.streak_current || 0}</div>
-                     <div className="text-[10px] text-orange-600 font-bold uppercase">Racha Días</div>
-                  </div>
-                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 text-center">
-                     <Target className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-                     <div className="text-xl font-bold text-gray-900">{completionCount}</div>
-                     <div className="text-[10px] text-blue-600 font-bold uppercase">Misiones</div>
-                  </div>
-                  <div className="bg-purple-50 p-3 rounded-lg border border-purple-100 text-center">
-                     <Crown className="w-5 h-5 text-purple-500 mx-auto mb-1" />
-                     <div className="text-xl font-bold text-gray-900">{dexUnlockCount}</div>
-                     <div className="text-[10px] text-purple-600 font-bold uppercase">Items DEX</div>
-                  </div>
-               </div>
-            </div>
+                {/* Main Stats Row */}
+                <div className="flex gap-4">
+                   <div className="text-center">
+                      <div className="bg-orange-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-1 border border-orange-100">
+                         <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
+                      </div>
+                      <div className="font-bold text-gray-900">{stats?.streak_current || 0}</div>
+                      <div className="text-[10px] uppercase text-gray-400 font-bold">Racha</div>
+                   </div>
+                   <div className="text-center">
+                      <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-1 border border-blue-100">
+                         <Target className="w-6 h-6 text-blue-500" />
+                      </div>
+                      <div className="font-bold text-gray-900">{completionCount}</div>
+                      <div className="text-[10px] uppercase text-gray-400 font-bold">Misiones</div>
+                   </div>
+                </div>
+             </div>
+
+             {/* XP Progress Bar */}
+             <div className="mb-8 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="flex justify-between items-end mb-2">
+                   <div>
+                      <span className="text-sm font-medium text-gray-500">Progreso de Nivel</span>
+                      <div className="text-2xl font-bold text-gray-900 leading-none mt-1">
+                         {xpInLevel} <span className="text-sm text-gray-400 font-normal">/ {xpRequiredForLevel} XP</span>
+                      </div>
+                   </div>
+                   <div className="text-right">
+                      <div className="text-xs font-bold text-primary-700 bg-primary/20 px-2 py-1 rounded">
+                         {Math.round(progressPercent)}%
+                      </div>
+                   </div>
+                </div>
+                <div className="h-4 bg-white rounded-full overflow-hidden border border-gray-200 shadow-inner">
+                   <div 
+                      className="h-full bg-gradient-to-r from-primary to-lime-400 transition-all duration-1000 ease-out relative"
+                      style={{ width: `${progressPercent}%` }}
+                   >
+                      <div className="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]"></div>
+                   </div>
+                </div>
+             </div>
+
+             {/* Attributes Grid (Mini) */}
+             <div>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Atributos Principales</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+                   {skills.slice(0, 4).map((skill, idx) => {
+                      const colors = ["bg-emerald-500", "bg-blue-500", "bg-purple-500", "bg-orange-500"];
+                      return (
+                         <div key={skill.id} className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${colors[idx % colors.length]}`} />
+                            <div className="flex-1 flex justify-between text-sm">
+                               <span className="font-medium text-gray-700 truncate">{skill.name}</span>
+                               <span className="font-bold text-gray-900">{skill.xp}</span>
+                            </div>
+                         </div>
+                      );
+                   })}
+                   {skills.length === 0 && (
+                      <span className="text-sm text-gray-400 italic">Sin atributos desarrollados aún.</span>
+                   )}
+                </div>
+             </div>
+
           </div>
         </div>
 
         {/* BOTTOM GRID SECTION */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
            
-           {/* Column 1: Attributes (Skills) */}
+           {/* Column 1: Performance Chart */}
            <div className="md:col-span-2 space-y-6">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                 <Zap className="w-5 h-5 text-yellow-500 fill-yellow-500" /> Atributos de Personaje
-              </h2>
-              
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
-                    {skills.slice(0, 6).map((skill, idx) => {
-                        const colors = ["bg-emerald-500", "bg-blue-500", "bg-purple-500", "bg-orange-500"];
-                        return (
-                           <AttributeBar 
-                              key={skill.id} 
-                              label={skill.name} 
-                              value={skill.xp} 
-                              colorClass={colors[idx % colors.length]} 
-                           />
-                        );
-                    })}
-                 </div>
-                 {skills.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                       Completa misiones para desarrollar tus atributos.
-                    </div>
-                 )}
-              </div>
-
-              {/* Chart Section */}
               <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                  <div className="flex justify-between items-center mb-6">
                     <div>
-                       <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">Rendimiento Semanal</h3>
-                       <p className="text-sm text-muted-foreground">Puntos de XP ganados en los últimos 7 días</p>
+                       <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-green-600" />
+                          Rendimiento Semanal
+                       </h3>
+                       <p className="text-sm text-muted-foreground mt-1">Tu actividad de los últimos 7 días</p>
                     </div>
                     <div className="text-right">
-                       <div className="text-2xl font-black text-gray-900 flex items-center justify-end gap-2">
-                          <TrendingUp className="w-5 h-5 text-green-500" />
+                       <div className="text-2xl font-black text-gray-900">
                           +{chartData.reduce((acc, curr) => acc + curr.xp, 0)}
                        </div>
-                       <div className="text-xs font-bold text-gray-400 uppercase">XP Total Semana</div>
+                       <div className="text-xs font-bold text-gray-400 uppercase">XP Ganada</div>
                     </div>
                  </div>
                  
-                 <div className="h-[200px] w-full">
+                 <div className="h-[250px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                        <AreaChart data={chartData}>
                           <defs>
@@ -285,10 +294,20 @@ export default function Stats() {
                                 <stop offset="95%" stopColor="#d4e83a" stopOpacity={0}/>
                              </linearGradient>
                           </defs>
+                          <XAxis 
+                             dataKey="date" 
+                             axisLine={false} 
+                             tickLine={false} 
+                             tick={{ fill: '#9ca3af', fontSize: 12 }} 
+                             dy={10}
+                          />
+                          <YAxis 
+                             hide={true} 
+                          />
                           <Tooltip 
                              contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                              itemStyle={{ color: '#000', fontWeight: 'bold' }}
-                             cursor={{ stroke: '#d4e83a', strokeWidth: 2 }}
+                             cursor={{ stroke: '#d4e83a', strokeWidth: 2, strokeDasharray: '5 5' }}
                           />
                           <Area 
                              type="monotone" 
@@ -297,24 +316,43 @@ export default function Stats() {
                              fillOpacity={1} 
                              fill="url(#colorXp)" 
                              strokeWidth={3}
+                             activeDot={{ r: 6, strokeWidth: 0, fill: '#a3b825' }}
                           />
                        </AreaChart>
                     </ResponsiveContainer>
+                 </div>
+              </div>
+
+              {/* Attributes Detailed */}
+              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-6 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-yellow-500" /> Desglose de Habilidades
+                 </h3>
+                 <div className="space-y-4">
+                    {skills.map((skill, idx) => {
+                       const colors = ["bg-emerald-500", "bg-blue-500", "bg-purple-500", "bg-orange-500"];
+                       return (
+                          <AttributeBar 
+                             key={skill.id} 
+                             label={skill.name} 
+                             value={skill.xp} 
+                             colorClass={colors[idx % colors.length]} 
+                          />
+                       );
+                    })}
                  </div>
               </div>
            </div>
 
            {/* Column 2: Inventory & Badges */}
            <div className="space-y-6">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                 <BookOpen className="w-5 h-5 text-purple-600" /> Estado de Cuenta
-              </h2>
-
               {/* Best Streak Card */}
-              <Card className="border-l-4 border-l-orange-500 overflow-hidden relative group">
-                 <div className="absolute right-0 top-0 w-24 h-24 bg-orange-100 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
+              <Card className="border-l-4 border-l-orange-500 overflow-hidden relative group shadow-sm hover:shadow-md transition-all">
+                 <div className="absolute right-0 top-0 w-24 h-24 bg-orange-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
                  <CardHeader className="pb-2 relative">
-                    <CardTitle className="text-sm text-muted-foreground uppercase font-bold tracking-wider">Mejor Racha Histórica</CardTitle>
+                    <CardTitle className="text-sm text-muted-foreground uppercase font-bold tracking-wider flex items-center gap-2">
+                       <Crown className="w-4 h-4 text-orange-500" /> Mejor Racha
+                    </CardTitle>
                  </CardHeader>
                  <CardContent className="relative">
                     <div className="flex items-baseline gap-2">
@@ -325,35 +363,19 @@ export default function Stats() {
               </Card>
 
               {/* Inventory Summary */}
-              <Card>
+              <Card className="shadow-sm border-t-4 border-t-purple-500">
                  <CardHeader>
-                    <CardTitle className="text-sm font-bold uppercase text-gray-500">Resumen de Inventario</CardTitle>
+                    <CardTitle className="text-sm font-bold uppercase text-gray-500 flex items-center gap-2">
+                       <BookOpen className="w-4 h-4 text-purple-600" /> Inventario DEX
+                    </CardTitle>
                  </CardHeader>
                  <CardContent>
-                    <div className="space-y-4">
-                       <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-100">
-                          <div className="flex items-center gap-3">
-                             <div className="bg-white p-2 rounded-md shadow-sm">
-                                <BookOpen className="w-4 h-4 text-purple-600" />
-                             </div>
-                             <div>
-                                <div className="font-bold text-gray-900">Recursos DEX</div>
-                                <div className="text-xs text-purple-600 font-medium">{dexUnlockCount} desbloqueados</div>
-                             </div>
-                          </div>
-                       </div>
-                       
-                       <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
-                          <div className="flex items-center gap-3">
-                             <div className="bg-white p-2 rounded-md shadow-sm">
-                                <Star className="w-4 h-4 text-blue-600" />
-                             </div>
-                             <div>
-                                <div className="font-bold text-gray-900">Logros Totales</div>
-                                <div className="text-xs text-blue-600 font-medium">{completionCount} completados</div>
-                             </div>
-                          </div>
-                       </div>
+                    <div className="text-center py-4">
+                       <div className="text-5xl font-black text-gray-900 mb-2">{dexUnlockCount}</div>
+                       <p className="text-sm text-muted-foreground">Recursos Desbloqueados</p>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-3 text-xs text-purple-700 mt-2 text-center font-medium">
+                       Sigue subiendo de nivel para acceder a más herramientas.
                     </div>
                  </CardContent>
               </Card>
