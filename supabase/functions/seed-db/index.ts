@@ -125,60 +125,55 @@ serve(async (req) => {
       ]
     };
 
-    console.log("[seed-db] Starting cleanup...");
+    let insertedCount = 0;
+    let skippedCount = 0;
 
-    // 2. LIMPIEZA
-    // Desvincular perfiles antes de borrar tracks
-    await supabase.from('profiles').update({ track_id: null }).neq('user_id', '00000000-0000-0000-0000-000000000000');
-    
-    // Borrar datos dependientes
-    await supabase.from('user_mission_assignments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('mission_steps').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('missions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    
-    // Borrar maestros
-    await supabase.from('tracks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('skills').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    console.log("[seed-db] Starting smart sync...");
 
-    console.log("[seed-db] Cleanup done. Inserting new data...");
-
-    // 3. INSERCIÓN DE SKILLS
+    // 1. SKILLS
     const skillMap = {};
+    const { data: existingSkills } = await supabase.from('skills').select('id, name');
+    const existingSkillMap = existingSkills ? Object.fromEntries(existingSkills.map(s => [s.name, s.id])) : {};
+
     for (const skill of SKILLS) {
-      const { data, error } = await supabase.from('skills').insert(skill).select().single();
-      if (error) throw error;
-      skillMap[skill.name] = data.id;
+      if (existingSkillMap[skill.name]) {
+         skillMap[skill.name] = existingSkillMap[skill.name];
+      } else {
+         const { data, error } = await supabase.from('skills').insert(skill).select().single();
+         if (error) { console.error("Skill error", error); continue; }
+         skillMap[skill.name] = data.id;
+      }
     }
 
-    // 4. INSERCIÓN DE TRACKS
+    // 2. TRACKS
     const trackMap = {};
+    const { data: existingTracks } = await supabase.from('tracks').select('id, name');
+    const existingTrackMap = existingTracks ? Object.fromEntries(existingTracks.map(t => [t.name, t.id])) : {};
+
     for (const track of TRACKS) {
-      const { data, error } = await supabase.from('tracks').insert(track).select().single();
-      if (error) throw error;
-      trackMap[track.name] = data.id;
+       if (existingTrackMap[track.name]) {
+          trackMap[track.name] = existingTrackMap[track.name];
+       } else {
+          const { data, error } = await supabase.from('tracks').insert(track).select().single();
+          if (error) { console.error("Track error", error); continue; }
+          trackMap[track.name] = data.id;
+       }
     }
 
-    // 5. INSERCIÓN DE MISIONES
+    // 3. MISIONES
+    // Obtener todas las misiones existentes para evitar duplicados por título
+    // Esto es "costoso" si hay muchas, pero para un seed funciona.
+    const { data: existingMissions } = await supabase.from('missions').select('title, track_id');
+    const existingMissionSet = new Set(
+       existingMissions?.map(m => `${m.title}-${m.track_id || 'null'}`) || []
+    );
+
     const missionsToInsert = [];
 
     // A. Universales
     UNIVERSAL_MISSIONS.forEach(m => {
-      missionsToInsert.push({
-        title: m.title,
-        description: m.description,
-        type: m.type,
-        difficulty: m.difficulty,
-        xp_reward: m.xp,
-        skill_id: skillMap[m.skill],
-        track_id: null,
-        is_active: true
-      });
-    });
-
-    // B. Por Track
-    for (const [trackName, missions] of Object.entries(TRACK_MISSIONS)) {
-      const trackId = trackMap[trackName];
-      missions.forEach(m => {
+      const key = `${m.title}-null`;
+      if (!existingMissionSet.has(key)) {
         missionsToInsert.push({
           title: m.title,
           description: m.description,
@@ -186,18 +181,53 @@ serve(async (req) => {
           difficulty: m.difficulty,
           xp_reward: m.xp,
           skill_id: skillMap[m.skill],
-          track_id: trackId,
+          track_id: null,
           is_active: true
         });
+      } else {
+        skippedCount++;
+      }
+    });
+
+    // B. Por Track
+    for (const [trackName, missions] of Object.entries(TRACK_MISSIONS)) {
+      const trackId = trackMap[trackName];
+      if (!trackId) continue;
+
+      missions.forEach(m => {
+        const key = `${m.title}-${trackId}`;
+        if (!existingMissionSet.has(key)) {
+          missionsToInsert.push({
+            title: m.title,
+            description: m.description,
+            type: m.type,
+            difficulty: m.difficulty,
+            xp_reward: m.xp,
+            skill_id: skillMap[m.skill],
+            track_id: trackId,
+            is_active: true
+          });
+        } else {
+          skippedCount++;
+        }
       });
     }
 
-    const { error: missionError } = await supabase.from('missions').insert(missionsToInsert);
-    if (missionError) throw missionError;
+    if (missionsToInsert.length > 0) {
+       // Insertar en bloques de 50 para seguridad
+       const chunkSize = 50;
+       for (let i = 0; i < missionsToInsert.length; i += chunkSize) {
+          const chunk = missionsToInsert.slice(i, i + chunkSize);
+          const { error: missionError } = await supabase.from('missions').insert(chunk);
+          if (missionError) console.error("Mission insert error", missionError);
+          else insertedCount += chunk.length;
+       }
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Database seeded successfully with monetization quests." 
+      message: `Database synced. Added ${insertedCount} new missions. Skipped ${skippedCount} existing.`,
+      stats: { inserted: insertedCount, skipped: skippedCount }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
