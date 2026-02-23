@@ -81,9 +81,11 @@ export default function Skills() {
              // Override if already has XP
              if (skill.xp > 0) isLocked = false;
 
+             const status: 'locked' | 'available' | 'completed' = isLocked ? 'locked' : (skill.xp > 500 ? 'completed' : 'available');
+
              return {
                 ...skill,
-                status: isLocked ? 'locked' : (skill.xp > 500 ? 'completed' : 'available')
+                status
              };
           });
 
